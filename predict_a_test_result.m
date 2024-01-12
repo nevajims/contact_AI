@@ -2,10 +2,13 @@ function   predict_a_test_result(normalising_mode_index,mode_pairs_to_Use)
 
 % predict_a_test_result(1,[8,9,14,16])
 % predict_a_test_result(1,[3,6,8,9,14,16])   ----  standard run
+
 % mode_pairs_to_Use = [3,6,8,9,14,16];       %  %  this will be an input argument 
+
 % normalisation_mode_pair =  1               %  %  (1,1) this will be an input argument
 mode_pairs=  [1,1;1,2;1,3;1,4;2,1;2,2;2,3;2,4;3,1;3,2;3,3;3,4;4,1;4,2;4,3;4,4];
 labels = {'1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3','4-4'}; 
+
 normalising_mode_pair =  mode_pairs(normalising_mode_index,:);
 NumNeighbors = 3 ;
 std_bar_size = 1;
@@ -14,7 +17,9 @@ show_tag_mean_mode_plots = 0 ;
 P_W_D = pwd ;
 
 %  load a block data set 
-cd('C:\Users\Dev\OneDrive\shared from tti test\AIDATA')
+cd('P:\GITHUBS\AIDATA')
+%cd('C:\Users\Dev\OneDrive\shared from tti test\AIDATA')
+
 [file_,path_]=uigetfile();
 dummy =  open(strcat(path_,file_));
 cd(P_W_D)

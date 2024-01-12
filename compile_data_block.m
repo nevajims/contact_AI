@@ -6,10 +6,16 @@ function Block_DATA = compile_data_block(Percentage_Peak, Labels_)
 % Choose a block of files and go through them  1 by one and compile the data
 % compile_data_block( 45 , {'not cracked','cracked'})
 % compile_data_block( 45 , {'zero','one','two','three','four','five'})
+% compile_data_block( 45 , {'not cracked','small','med','large'})
+% compile_data_block( 45 , {'Clear','small','med','large'})
+%                     0/1  2/3  4  5
+
 Peak_method = 3;
 
 P_W_D = pwd;
-cd ('C:\Users\Dev\OneDrive\shared from tti test\AIDATA')
+cd('P:\GITHUBS\AIDATA')
+
+%cd ('C:\Users\Dev\OneDrive\shared from tti test\AIDATA')
 [chosen_files , path]  =  uigetfile('*.*','Select the INPUT DATA FILE(s)','MultiSelect','on');
 
 for index = 1 : length(chosen_files)
@@ -47,8 +53,6 @@ end %for index = 1:length(Labels_)
 %}
 %Block_DATA.mean_tag_modes_     =  mean_tag_modes_  ;
 %Block_DATA.std_tag_modes_      =  std_tag_modes_   ;
-
-
 
 % labels = {'1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3','4-4'} 
 

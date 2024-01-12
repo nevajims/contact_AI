@@ -1,7 +1,9 @@
 function [Values_ ,file_ ] =  Get_mode_values_from_a_test (P_P_P, Percentage_Peak)
-
 P_W_D =  pwd;
-cd('C:\Users\Dev\OneDrive\shared from tti test\AIDATA')
+cd('P:\GITHUBS\AIDATA')
+
+%cd('C:\Users\Dev\OneDrive\shared from tti test\AIDATA')
+
 [file_,path_]=uigetfile();
 
 % Need Tag
