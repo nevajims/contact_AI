@@ -101,7 +101,6 @@ grid_data.distance_vector      = distance_vector     ;
 
 end  %function grid_data = fn_get_grid_data(   )
 
-
 function  default_options = get_default_options()
 default_options.norm_to_what = 1   ;  % 1 - normalised to maximum in map, 2 = normalised to maximum in data
 default_options.db_range = 30      ; 

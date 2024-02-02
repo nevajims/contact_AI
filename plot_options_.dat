@@ -1,0 +1,44 @@
+START
+%plot_distance%     the distance along the length to do the mode map from 0 (start) to 1 (end)
+0.66
+%max_range%
+3
+%tx_modes%
+1,2,3,4,3,3,3,4,4,4
+%rx_modes%
+1,2,3,4,1,2,3,1,2,3
+%db_range%
+40
+%show_backward%     exciting from end so not needed
+1
+%showmesh%          1 shows the mesh with transducer locations  
+1
+%showdispersion%    1 shows the dispersion curves
+1
+%show_cw_result%
+1
+%show_feature_map%
+1
+%grid_size%
+50
+%norm_to_what%  1-normalised to maximum in map, 2-normalised to maximum in data
+1 
+%dist_tol% as a percentage distance tolerance band around nominal distance to consider set to zero for exact interpolation
+0
+%max_or_mean%   max = 1   and   mean = 2
+1
+%interp_or_val%  take the interpolated value(1) or the straight matrix value(2) for calculating the mode map 
+1
+%modes%
+1,2,3,4
+%flip_left_right%
+0
+%show_forward%
+1
+%transmit_delay_m%
+0
+%tx_mode_princ%
+3
+%rx_mode_princ%
+3
+END

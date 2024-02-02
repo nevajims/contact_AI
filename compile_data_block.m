@@ -9,6 +9,9 @@ function Block_DATA = compile_data_block(Percentage_Peak, Labels_)
 % compile_data_block( 45 , {'not cracked','small','med','large'})
 % compile_data_block( 45 , {'Clear','small','med','large'})
 %                     0/1  2/3  4  5
+% compile_data_block( 45 , {'No Crack','Crack','Large Crack'})
+%                     0  (1,2,3,4)  5
+
 
 Peak_method = 3;
 
