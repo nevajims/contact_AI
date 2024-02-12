@@ -30,24 +30,24 @@ dv = grid_data.distance_vector       ;
 [max_ind, max_val]  = get_point_for_mode_map(mm33,dv,P_P_P,Percentage_Peak,search_limits,display_plots);
 
 
-if display_plots(2)==1
-h_2 = figure;
-subplot(1,2,1)
-title('33')
-plot(dv,mm33,"Color",'b')
-hold on
-plot( [dv(max_ind),dv(max_ind) ],[min(mm33),max(mm33)  ],'r')
-subplot(1,2,2)
-title('22')
-plot(dv,mm22,"Color",'b')
-hold on
-plot( [dv(max_ind),dv(max_ind) ],[min(mm22),max(mm22)  ],'r')
-end
+%if display_plots(2)==1
+%h_2 = figure;
+%subplot(1,2,1)
+%title('33')
+%plot(dv,mm33,"Color",'b')
+%hold on
+%plot( [dv(max_ind),dv(max_ind) ],[min(mm33),max(mm33)  ],'r')
+%subplot(1,2,2)
+%title('22')
+%plot(dv,mm22,"Color",'b')
+%hold on
+%plot( [dv(max_ind),dv(max_ind) ],[min(mm22),max(mm22)  ],'r')
+%end
 
 
-if display_plots(3) ==1
-fn_plot_grid_data(grid_data, plot_options ,dv(max_ind))
-end %if display_plots(3) ==1
+%if display_plots(3) ==1
+%fn_plot_grid_data(grid_data, plot_options ,dv(max_ind))
+%end %if display_plots(3) ==1
 
 
 crack_mode = grid_data.data_stack(:,:,max_ind);
@@ -179,13 +179,16 @@ end % while range_selected_ok == 0
 end %switch (Point_or_Peak)
 
 else
+
 [~,lower_index]  =   min(abs(dv - search_limits(1))) ; 
 [~,upper_index]  =   min(abs(dv - search_limits(2))) ; 
+
 [max_val,temp_ind]   =  max(mm33(lower_index:upper_index)); 
 max_ind              =  temp_ind + lower_index - 1  ;
 % go back from max index until %value is reached 
 target_val =  max_val * (Percentage_Peak / 100) ;  
 Perc_Val_found = 0;
+
 
 while Perc_Val_found ==0
 max_ind = max_ind - 1;
@@ -195,11 +198,17 @@ Perc_Val_found = 1;
 end
 % target_val
 end %while Perc_Val_found ==0
+
+
 if(display_plots(1)) == 1
 h_ = figure; 
 plot(dv,mm33,"Color",'b') 
 hold on
-end
+plot( [dv(lower_index),dv(lower_index)],[min(mm33),max(mm33)  ],'r')
+plot( [dv(upper_index),dv(upper_index)],[min(mm33),max(mm33)  ],'r')
+
+end  % if(display_plots(1)) == 1
+
 
 end
 

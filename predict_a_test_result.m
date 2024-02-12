@@ -8,17 +8,28 @@ function   predict_a_test_result(varargin)
 % predict_a_test_result(1,2,[8,9,14,16],[0.65,0.9])
 % function   predict_a_test_result(normalising_mode_index, std_bar_size, mode_pairs_to_Use,search_limits, DATA_PATH) Nargin = 5 
 % function   predict_a_test_result(normalising_mode_index, std_bar_size, mode_pairs_to_Use,search_limits, DATA_PATH, FILE TO PREDICT) Nargin = 6
+
+
 % predict_a_test_result(1,2,[8,9,14,16],[0.65,0.9],'P:\GITHUBS\AIDATA\Learning_block_2\Block_data_45_PP_4_L48_DV_1.mat','P:\GITHUBS\AIDATA\Learning_block_2\PD_CW_test_Jim_Evans__H4CE$3$_1.mat')
 % use vargin and nargin
 %nargin
 %varargin
 
 
-% display_plots = [0 0 0 1 0];
+% display_plots = [0 0 0];
 % diplay_txt = [1 0 0 0 1 1 1 1 0 0 0 ];
 
-display_plots = [0 0 0 0 0];
-diplay_txt = [0 0 0 0 0 0 0 0 0 0 0 ];
+display_plots = [1 1 1];
+
+% Position to take the mode map (Marked with circle)  and the region themax is searched for
+% the mode plot means and stds --with the file name block data file name the title    
+% mode map of the specific test at the postion identiified in Fig. 1
+%
+% diplay_txt = [0 0 0 0 0 0 0 0 0 0 0];
+diplay_txt = [1 1 1 1 1 1 1 1 1 1 1 ];
+%
+%
+
 
 if nargin > 2  &&  nargin < 7
 normalising_mode_index = varargin{1};
@@ -73,14 +84,16 @@ P_W_D = pwd ;
 cd('P:\GITHUBS\AIDATA')
 %cd('C:\Users\Dev\OneDrive\shared from tti test\AIDATA')
 [file_,path_]=uigetfile();
-dummy =  open(strcat(path_,file_));
+
+DATA_PATH = [path_,file_];
+dummy =  open(strcat(DATA_PATH));
 cd(P_W_D)
 
 else
 dummy =  open(strcat(DATA_PATH));
 end
 
-
+block_file_ = DATA_PATH(max(strfind(DATA_PATH,'\'))+1:end);
 
 
 %dummy =  open('P:\GITHUBS\Liams_algos\Learning_block_1\Block_data_45_PP_2_L8_DV.mat');
@@ -117,7 +130,7 @@ end %for index = 1:length(Labels_)
 
 %  this will be done on the fly
 %  this will be done on the fly
-%dummy =  open(strcat(path_2,file_2));
+%dummy =  open(strcat(path_2,file_2));diplay_txt
 %dummy =  open('P:\GITHUBS\Liams_algos\Learning_block_1\AI_Block_45_PP_2_L16_DV_NN_3_mat.mat');
 %dummy =  open('P:\GITHUBS\Liams_algos\Learning_block_2\AI_Block_45_PP_6_L48_DV_NN_3_mat.mat');
 % AI_Block = dummy.AI_Block;
@@ -134,7 +147,8 @@ spec_vals_temp = reshape(SV_crack_mode, 1 , numel(SV_crack_mode));
 [return_tag,score_,node_] = predict(AI_Block , spec_vals_temp(mode_pairs_to_Use));
 
 
-[Score_vals]   = do_mean_std_plot(spec_vals_temp,Block_DATA,mode_pairs_to_Use,labels,std_bar_size,display_plots);
+[Score_vals]   = do_mean_std_plot(spec_vals_temp,Block_DATA,mode_pairs_to_Use,labels,std_bar_size,display_plots,file_name,block_file_);
+
 [score_table,log_lik_table, rank_table, within_range_table,std_dist_table, predict_tag]    = get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Block_DATA.Labels_,std_bar_size);
 
 
@@ -161,9 +175,13 @@ if diplay_txt(5) ==1
 disp(['The AI predicts that this results is:   ', return_tag{1} ,' .'])
 end
 
+
+
 if diplay_txt(6) ==1
 disp(['The statistical analysis predicts that the result is:   ',  predict_tag ,' .'])
 end
+
+
 
 
 if diplay_txt(7) ==1
@@ -210,9 +228,9 @@ end
 %end %if show_tag_mean_mode_plots == 1
 
 interp_data_2 = get_interp_data(spec_vals.crack_mode,50);
-if display_plots(5) ==1
+if display_plots(3) ==1
 plot_interp_data(interp_data_2,'SPECIFIC TEST mode plot',0.8)
-end %if display_plots(5) ==1
+end %if display_plots(3) ==1
 
 
 end  % function   predict_a_test_result
@@ -339,35 +357,47 @@ rank_table = array2table(rank_mat   ,...
 
 end %function Tag_scores_    = get_tag_scores (Score_vals);
 
-function [Score_vals]  =  do_mean_std_plot(spec_vals_temp , Block_DATA , mode_pairs_to_Use,labels,std_bar_size,display_plots)
+function [Score_vals]  =  do_mean_std_plot(spec_vals_temp , Block_DATA , mode_pairs_to_Use,labels,std_bar_size,display_plots,file_name,block_file_)
 
-if display_plots(4) ==1
+if display_plots(2) ==1
 figure
-end% if display_plots(4) ==1
+end% if display_plots(2) ==1
 
 val_nos_tmp = 1:16;
 
-if display_plots(4) ==1
+if display_plots(2) ==1
+
+    
 xBlanks = zeros(1, length(mode_pairs_to_Use));
 axes('XTick', 1: length(mode_pairs_to_Use), 'XLim', [0,length(mode_pairs_to_Use)+1 ], 'XTickLabel', labels(mode_pairs_to_Use));
+
+file_name(find(file_name =='_')) = ' ';
+block_file_(find(block_file_=='_')) = ' ';
+
+title({['TEST:: ',file_name],['LB:: ',block_file_]})
+
 hold on
-end %if display_plots(4) ==1
+end %if display_plots(2) ==1
 
 
 for index = 1: length(Block_DATA.Labels_)
 mean_temp         =  reshape (Block_DATA.mean_tag_modes_{index},1,numel(Block_DATA.mean_tag_modes_{index}));
 SD_temp           =  reshape (Block_DATA.std_tag_modes_{index},1,numel(Block_DATA.std_tag_modes_{index}));
-if display_plots(4) ==1
+
+
+if display_plots(2) ==1
 errorbar(val_nos_tmp(1:length(mode_pairs_to_Use)),mean_temp(mode_pairs_to_Use),SD_temp(mode_pairs_to_Use)*std_bar_size,':o')
-end%if display_plots(4) ==1
+end%if display_plots(2) ==1
+
 Means_{index} = mean_temp(mode_pairs_to_Use);
 Stds_{index}  = SD_temp(mode_pairs_to_Use);
 end %for index = 1: length(Block_DATA.Labels_)
 
-if display_plots(4) ==1
+if display_plots(2) ==1
 plot(val_nos_tmp(1:length(mode_pairs_to_Use)),spec_vals_temp(mode_pairs_to_Use),'s','markersize',14)
 legend([Block_DATA.Labels_,{'TEST'}],'location','EastOutside');
-end %if display_plots(4) ==1
+
+end %if display_plots(2) ==1
 
 Score_vals.Means_       =  Means_                              ;
 Score_vals.Stds_        =  Stds_                               ; 
