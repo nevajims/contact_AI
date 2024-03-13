@@ -1,6 +1,5 @@
 %
 function   predict_a_test_result(varargin)
-
 % use a structure for the variable inputs
 % function   predict_a_test_result(normalising_mode_index, std_bar_size, mode_pairs_to_Use ) Nargin = 3  
 % predict_a_test_result(1,2,[8,9,14,16])
@@ -8,25 +7,23 @@ function   predict_a_test_result(varargin)
 % predict_a_test_result(1,2,[8,9,14,16],[0.65,0.9])
 % function   predict_a_test_result(normalising_mode_index, std_bar_size, mode_pairs_to_Use,search_limits, DATA_PATH) Nargin = 5 
 % function   predict_a_test_result(normalising_mode_index, std_bar_size, mode_pairs_to_Use,search_limits, DATA_PATH, FILE TO PREDICT) Nargin = 6
-
-
 % predict_a_test_result(1,2,[8,9,14,16],[0.65,0.9],'P:\GITHUBS\AIDATA\Learning_block_2\Block_data_45_PP_4_L48_DV_1.mat','P:\GITHUBS\AIDATA\Learning_block_2\PD_CW_test_Jim_Evans__H4CE$3$_1.mat')
+
 % use vargin and nargin
 %nargin
 %varargin
 
-
 % display_plots = [0 0 0];
 % diplay_txt = [1 0 0 0 1 1 1 1 0 0 0 ];
-
-display_plots = [1 1 1];
 
 % Position to take the mode map (Marked with circle)  and the region themax is searched for
 % the mode plot means and stds --with the file name block data file name the title    
 % mode map of the specific test at the postion identiified in Fig. 1
-%
 % diplay_txt = [0 0 0 0 0 0 0 0 0 0 0];
-diplay_txt = [1 1 1 1 1 1 1 1 1 1 1 ];
+
+
+display_plots = [0 0 0];
+diplay_txt = [1 0 0 0 1 1 0 0 0 0 0 ];
 %
 %
 
@@ -63,13 +60,11 @@ end % if nargin > 2  &&  nargin < 7
 % DONE  ------    Do a ranking for "within STD range"  1 / 0  where std range is selected 
 % (3)  combine them together to do a full analysis of the data  -  for all the
 % tests
-
 % predict_a_test_result(1,[3,6,8,9,14,16])   ----  standard run
 % mode_pairs_to_Use = [3,6,8,9,14,16];       %  %  this will be an input argument 
-
-
-
 % normalisation_mode_pair =  1               %  %  (1,1) this will be an input argument
+
+
 mode_pairs=  [1,1;1,2;1,3;1,4;2,1;2,2;2,3;2,4;3,1;3,2;3,3;3,4;4,1;4,2;4,3;4,4];
 labels = {'1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3','4-4'}; 
 
@@ -79,12 +74,12 @@ NumNeighbors = 3 ;
 show_tag_mean_mode_plots = 0 ;
 
 if isnan(DATA_PATH)
-P_W_D = pwd ;
+
+    P_W_D = pwd ;
 %  load a block data set 
 cd('P:\GITHUBS\AIDATA')
 %cd('C:\Users\Dev\OneDrive\shared from tti test\AIDATA')
 [file_,path_]=uigetfile();
-
 DATA_PATH = [path_,file_];
 dummy =  open(strcat(DATA_PATH));
 cd(P_W_D)
@@ -145,11 +140,8 @@ SV_crack_mode = SV_crack_mode./SV_crack_mode(normalising_mode_pair(1),normalisin
 spec_vals_temp = reshape(SV_crack_mode, 1 , numel(SV_crack_mode));
 
 [return_tag,score_,node_] = predict(AI_Block , spec_vals_temp(mode_pairs_to_Use));
-
-
 [Score_vals]   = do_mean_std_plot(spec_vals_temp,Block_DATA,mode_pairs_to_Use,labels,std_bar_size,display_plots,file_name,block_file_);
-
-[score_table,log_lik_table, rank_table, within_range_table,std_dist_table, predict_tag]    = get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Block_DATA.Labels_,std_bar_size);
+[score_table,log_lik_table, rank_table, within_range_table,std_dist_table, predict_tag,LL_tag]    = get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Block_DATA.Labels_,std_bar_size);
 
 
 
@@ -157,12 +149,13 @@ if diplay_txt(1) ==1
 disp('-----------------------------------------------------------------')
 disp(file_name)
 disp('-----------------------------------------------------------------')
-end
+end %if diplay_txt(1) ==1
 
 
 if diplay_txt(2) ==1
 disp(['Peak location: ',num2str(spec_vals.Peak_loc),' mm.'])
 end
+
 if diplay_txt(3) ==1
 display_Block_data_stats(Block_DATA);
 end
@@ -175,30 +168,32 @@ if diplay_txt(5) ==1
 disp(['The AI predicts that this results is:   ', return_tag{1} ,' .'])
 end
 
-
-
 if diplay_txt(6) ==1
-disp(['The statistical analysis predicts that the result is:   ',  predict_tag ,' .'])
+disp(['The dist from mean predicts that the result is:   ',  predict_tag ,' .'])
+disp(['The log likelyhood predicts that the result is:   ',  LL_tag ,' .'])
 end
 
 
-
-
 if diplay_txt(7) ==1
+disp('-----------------------------------------------------------------')
+disp('Distance from mean')
+disp('-----------------------------------------------------------------')
 disp('Dist from mean for each mode pair')
 disp(score_table)
 end
 
 if diplay_txt(8) ==1
 disp('-----------------------------------------------------------------')
-disp('Log Likelyhood')
+disp('Ranking for dist from mean')
 disp('-----------------------------------------------------------------')
-disp(log_lik_table)
+disp(rank_table)
 end
 
 if diplay_txt(9) ==1
-disp('Ranking for dist from mean')
-disp(rank_table)
+disp('-----------------------------------------------------------------')
+disp('Log Likelyhood')
+disp('-----------------------------------------------------------------')
+disp(log_lik_table)
 end
 
 
@@ -207,7 +202,6 @@ disp('-----------------------------------------------------------------')
 disp(['Within range (+/- ',num2str(std_bar_size), ' * std.)'])
 disp('-----------------------------------------------------------------')
 disp(within_range_table)
-disp('-----------------------------------------------------------------')
 end
 
 if diplay_txt(11) ==1
@@ -215,9 +209,10 @@ disp('-----------------------------------------------------------------')
 disp('No. of STD dist from mean')
 disp('-----------------------------------------------------------------')
 disp(std_dist_table)
-disp('-----------------------------------------------------------------')
-disp('-----------------------------------------------------------------')
 end
+
+disp('-----------------------------------------------------------------')
+
 
 
 %if show_tag_mean_mode_plots == 1
@@ -257,7 +252,7 @@ end %for index = 1:length(crack_mode_)
 
 end% function norm_crack_mode_ = normalse_crack_modes(Block_DATA.crack_mode_,normalising_mode_pair)
 
-function [score_table,log_lik_table, rank_table,within_range_table,std_dist_table, predict_tag] = get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Tags_,std_bar_size)
+function [score_table,log_lik_table, rank_table,within_range_table,std_dist_table, predict_tag,LL_tag] = get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Tags_,std_bar_size)
 
 %log_lik_table   --   to be created
 
@@ -319,6 +314,10 @@ score_table = array2table(score_mat,...
 log_lik_table = array2table(log_lik,...
        'VariableNames',columns__,...
        'RowNames',Tags_); 
+
+[~ ,LL_indx]  =  min(log_lik(:,end));
+LL_tag = Tags_{LL_indx};
+
 
 within_range_table = array2table(std_within_range_mat,...
        'VariableNames',columns__,...
