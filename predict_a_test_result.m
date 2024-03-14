@@ -1,18 +1,24 @@
 %
-function   predict_a_test_result(varargin)
+function  output_  =  predict_a_test_result(varargin) 
+
+% output_
+% output_.txt{1-11} 
+% output_.plots {1-3} 
+% output_.tables  (by name as part of the txt data)  -  to be merged into the txt at some point
+
 % use a structure for the variable inputs
 % function   predict_a_test_result(normalising_mode_index, std_bar_size, mode_pairs_to_Use ) Nargin = 3  
 % predict_a_test_result(1,2,[8,9,14,16])
 % function   predict_a_test_result(normalising_mode_index, std_bar_size, mode_pairs_to_Use,search_limits ) Nargin = 4 
+
 % predict_a_test_result(1,2,[8,9,14,16],[0.65,0.9])
+
 % function   predict_a_test_result(normalising_mode_index, std_bar_size, mode_pairs_to_Use,search_limits, DATA_PATH) Nargin = 5 
 % function   predict_a_test_result(normalising_mode_index, std_bar_size, mode_pairs_to_Use,search_limits, DATA_PATH, FILE TO PREDICT) Nargin = 6
+
 % predict_a_test_result(1,2,[8,9,14,16],[0.65,0.9],'P:\GITHUBS\AIDATA\Learning_block_2\Block_data_45_PP_4_L48_DV_1.mat','P:\GITHUBS\AIDATA\Learning_block_2\PD_CW_test_Jim_Evans__H4CE$3$_1.mat')
 
 % use vargin and nargin
-%nargin
-%varargin
-
 % display_plots = [0 0 0];
 % diplay_txt = [1 0 0 0 1 1 1 1 0 0 0 ];
 
@@ -21,12 +27,13 @@ function   predict_a_test_result(varargin)
 % mode map of the specific test at the postion identiified in Fig. 1
 % diplay_txt = [0 0 0 0 0 0 0 0 0 0 0];
 
+display_plots = [1 1 1];
+diplay_txt = [1 1 1 1 1 1 1 1 1 1 1 ];
 
-display_plots = [0 0 0];
-diplay_txt = [1 0 0 0 1 1 0 0 0 0 0 ];
-%
-%
+% display_plots = [0 0 0];
+% diplay_txt = [0 0 0 0 0 0 0 0 0 0 0 ];
 
+%diplay_txt = [1 0 0 0 1 1 0 0 0 0 0 ];
 
 if nargin > 2  &&  nargin < 7
 normalising_mode_index = varargin{1};
@@ -129,91 +136,135 @@ end %for index = 1:length(Labels_)
 %dummy =  open('P:\GITHUBS\Liams_algos\Learning_block_1\AI_Block_45_PP_2_L16_DV_NN_3_mat.mat');
 %dummy =  open('P:\GITHUBS\Liams_algos\Learning_block_2\AI_Block_45_PP_6_L48_DV_NN_3_mat.mat');
 % AI_Block = dummy.AI_Block;
-AI_Block  = Create_AI_learning_Block(NumNeighbors,mode_pairs_to_Use, norm_crack_mode_,Block_DATA.Labels_, Block_DATA.tag_label_index );
+
+%AI_Block  = Create_AI_learning_Block(NumNeighbors,mode_pairs_to_Use, norm_crack_mode_,Block_DATA.Labels_, Block_DATA.tag_label_index );
 
 
-[spec_vals,file_name] =  Get_mode_values_from_a_test(Block_DATA.Peak_method, Block_DATA.Percentage_Peak , search_limits,FILE_TO_PREDICT,display_plots);
-
+[spec_vals, file_name, output_.plot_data{1} ] =  Get_mode_values_from_a_test(Block_DATA.Peak_method , Block_DATA.Percentage_Peak , search_limits,FILE_TO_PREDICT,display_plots);
 
 SV_crack_mode = spec_vals.crack_mode;
 SV_crack_mode = SV_crack_mode./SV_crack_mode(normalising_mode_pair(1),normalising_mode_pair(2));
 spec_vals_temp = reshape(SV_crack_mode, 1 , numel(SV_crack_mode));
 
-[return_tag,score_,node_] = predict(AI_Block , spec_vals_temp(mode_pairs_to_Use));
-[Score_vals]   = do_mean_std_plot(spec_vals_temp,Block_DATA,mode_pairs_to_Use,labels,std_bar_size,display_plots,file_name,block_file_);
+% [return_tag,~,~] = predict(AI_Block , spec_vals_temp(mode_pairs_to_Use));
+
+
+[Score_vals,output_.plot_data{2}]   = do_mean_std_plot(spec_vals_temp,Block_DATA,mode_pairs_to_Use,labels,std_bar_size,display_plots,file_name,block_file_);
 [score_table,log_lik_table, rank_table, within_range_table,std_dist_table, predict_tag,LL_tag]    = get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Block_DATA.Labels_,std_bar_size);
 
 
+output_.txt{1}='-----------------------------------------------------------------\n'                      ; 
+output_.txt{1}= [output_.txt{1},file_name,'\n']                                                                   ;
+output_.txt{1}= [output_.txt{1},'-----------------------------------------------------------------\n']  ;
 
 if diplay_txt(1) ==1
-disp('-----------------------------------------------------------------')
-disp(file_name)
-disp('-----------------------------------------------------------------')
+fprintf(output_.txt{1})
 end %if diplay_txt(1) ==1
 
-
+output_.txt{2}= ['Peak location: ',num2str(spec_vals.Peak_loc),' mm.\n'];
 if diplay_txt(2) ==1
-disp(['Peak location: ',num2str(spec_vals.Peak_loc),' mm.'])
+fprintf(output_.txt{2})
 end
+
+
+output_.txt{3} = display_Block_data_stats(Block_DATA);
 
 if diplay_txt(3) ==1
-display_Block_data_stats(Block_DATA);
+fprintf(output_.txt{3})
 end
 
+
+output_.txt{4} = ['normalising_mode_pair: ',num2str(normalising_mode_pair(1)),'/',num2str(normalising_mode_pair(2)),'.\n'];
 if diplay_txt(4) ==1
-disp(['normalising_mode_pair: ',num2str(normalising_mode_pair(1)),'/',num2str(normalising_mode_pair(2)),'.'])
+fprintf(output_.txt{4})
 end
+
+%output_.txt{5} = ['The AI predicts that this results is:   ', return_tag{1} ,' .\n'];
+output_.txt{5} = 'The AI prediction currently removed \n';
 
 if diplay_txt(5) ==1
-disp(['The AI predicts that this results is:   ', return_tag{1} ,' .'])
+fprintf(output_.txt{5})
 end
 
+output_.txt{6} = ['The dist from mean predicts that the result is:   ',  predict_tag ,' .\n'];
+output_.txt{6} = [output_.txt{6},'The log likelyhood predicts that the result is:   ',  LL_tag ,' .\n'   ];
 if diplay_txt(6) ==1
-disp(['The dist from mean predicts that the result is:   ',  predict_tag ,' .'])
-disp(['The log likelyhood predicts that the result is:   ',  LL_tag ,' .'])
+fprintf(output_.txt{6})
 end
+
+
+% formatted_score_table = convert_table_to_formatted_txt(score_table); 
+output_.txt{7} = '-----------------------------------------------------------------\n';
+output_.txt{7} = [output_.txt{7}, 'Distance from mean\n'];
+output_.txt{7} = [output_.txt{7}, '-----------------------------------------------------------------\n'];
+output_.txt{7} = [output_.txt{7}, 'Dist from mean for each mode pair\n'];
+output_.score_table = score_table;
+TString = evalc('disp(output_.score_table)');
+output_.txt{7} = [output_.txt{7}, '-----------------------------------------------------------------\n'];
+output_.txt{7} = [output_.txt{7}, TString,                                                         '\n'];
+output_.txt{7} = [output_.txt{7}, '-----------------------------------------------------------------\n'];
+
 
 
 if diplay_txt(7) ==1
-disp('-----------------------------------------------------------------')
-disp('Distance from mean')
-disp('-----------------------------------------------------------------')
-disp('Dist from mean for each mode pair')
-disp(score_table)
+fprintf(output_.txt{7})
 end
+
+output_.txt{8} = '-----------------------------------------------------------------\n';
+output_.txt{8} = [output_.txt{8}, 'Ranking for dist from mean\n'];
+output_.txt{8} = [output_.txt{8}, '-----------------------------------------------------------------\n'];
+output_.rank_table = rank_table;
+TString = evalc('disp(output_.rank_table)');
+output_.txt{8} = [output_.txt{8}, '-----------------------------------------------------------------\n'];
+output_.txt{8} = [output_.txt{8}, TString,                                                         '\n'];
+output_.txt{8} = [output_.txt{8}, '-----------------------------------------------------------------\n'];
 
 if diplay_txt(8) ==1
-disp('-----------------------------------------------------------------')
-disp('Ranking for dist from mean')
-disp('-----------------------------------------------------------------')
-disp(rank_table)
+fprintf(output_.txt{8})
 end
 
+
+output_.txt{9} = '-----------------------------------------------------------------\n';
+output_.txt{9} = [output_.txt{9}, 'Log Likelyhood\n'];
+output_.txt{9} = [output_.txt{9}, '-----------------------------------------------------------------\n'];
+output_.log_lik_table = log_lik_table;
+TString = evalc('disp(output_.log_lik_table)');
+output_.txt{9} = [output_.txt{9}, '-----------------------------------------------------------------\n'];
+output_.txt{9} = [output_.txt{9}, TString,                                                         '\n'];
+output_.txt{9} = [output_.txt{9}, '-----------------------------------------------------------------\n'];
+
 if diplay_txt(9) ==1
-disp('-----------------------------------------------------------------')
-disp('Log Likelyhood')
-disp('-----------------------------------------------------------------')
-disp(log_lik_table)
+fprintf(output_.txt{9})
 end
+
+
+output_.txt{10} = '-----------------------------------------------------------------\n';
+output_.txt{10} = [output_.txt{10}, 'Within range (+/- ',num2str(std_bar_size), ' * std).\n'];
+output_.txt{10} = [output_.txt{10}, '-----------------------------------------------------------------\n'];
+output_.within_range_table = within_range_table;
+TString = evalc('disp(output_.within_range_table)');
+output_.txt{10} = [output_.txt{10}, '-----------------------------------------------------------------\n'];
+output_.txt{10} = [output_.txt{10}, TString,                                                         '\n'];
+output_.txt{10} = [output_.txt{10}, '-----------------------------------------------------------------\n'];
 
 
 if diplay_txt(10) ==1
-disp('-----------------------------------------------------------------')
-disp(['Within range (+/- ',num2str(std_bar_size), ' * std.)'])
-disp('-----------------------------------------------------------------')
-disp(within_range_table)
+fprintf(output_.txt{10})
 end
+
+output_.txt{11} = '-----------------------------------------------------------------\n';
+output_.txt{11} = [output_.txt{11}, 'No. of STD dist from mean\n'];
+output_.txt{11} = [output_.txt{11}, '-----------------------------------------------------------------\n'];
+output_.std_dist_table = std_dist_table;
+TString = evalc('disp(output_.std_dist_table)');
+output_.txt{11} = [output_.txt{11}, '-----------------------------------------------------------------\n'];
+output_.txt{11} = [output_.txt{11}, TString,                                                         '\n'];
+output_.txt{11} = [output_.txt{11}, '-----------------------------------------------------------------\n'];
+
 
 if diplay_txt(11) ==1
-disp('-----------------------------------------------------------------')
-disp('No. of STD dist from mean')
-disp('-----------------------------------------------------------------')
-disp(std_dist_table)
+fprintf(output_.txt{11})
 end
-
-disp('-----------------------------------------------------------------')
-
-
 
 %if show_tag_mean_mode_plots == 1
 %for index= 1: length(Block_DATA.Labels_)
@@ -222,9 +273,9 @@ disp('-----------------------------------------------------------------')
 %end  % for index= 1: length(Block_DATA.Labels_)
 %end %if show_tag_mean_mode_plots == 1
 
-interp_data_2 = get_interp_data(spec_vals.crack_mode,50);
+output_.plot_data{3} = get_interp_data(spec_vals.crack_mode,50);
 if display_plots(3) ==1
-plot_interp_data(interp_data_2,'SPECIFIC TEST mode plot',0.8)
+plot_interp_data(output_.plot_data{3},'SPECIFIC TEST mode plot',0.8)
 end %if display_plots(3) ==1
 
 
@@ -234,16 +285,20 @@ end  % function   predict_a_test_result
 % manually or automatically
 % check the FE get this bit correct
 
-%-------------------------------------------------------------------------------------
-%-------------------------------------------------------------------------------------
-%-------------------------------------------------------------------------------------
 
-function display_Block_data_stats(Block_DATA)
-disp('Number of tests for each data set'  )     
+function formated_output =  display_Block_data_stats(Block_DATA)
+
+formated_output = 'Number of tests for each data set\n' ;
+
 for index = 1:length(Block_DATA.Labels_)
-disp(['Tag = ', Block_DATA.Labels_{index},'(',num2str(length(find(Block_DATA.tag_label_index==index))),')'])
+formated_output = [formated_output,'Tag = ', Block_DATA.Labels_{index},'(',num2str(length(find(Block_DATA.tag_label_index==index))),')\n'];
 end %for index = 1:length(Block_DATA.Labels_)
+
 end %function display_Block_data_stats(Block_DATA);
+
+
+
+
 
 function norm_crack_mode_ = normalse_crack_modes(crack_mode_,normalising_mode_pair)
 for index = 1:length(crack_mode_)
@@ -356,7 +411,20 @@ rank_table = array2table(rank_mat   ,...
 
 end %function Tag_scores_    = get_tag_scores (Score_vals);
 
-function [Score_vals]  =  do_mean_std_plot(spec_vals_temp , Block_DATA , mode_pairs_to_Use,labels,std_bar_size,display_plots,file_name,block_file_)
+
+
+
+
+function [Score_vals, plot_data ]  =  do_mean_std_plot(spec_vals_temp , Block_DATA , mode_pairs_to_Use,labels,std_bar_size,display_plots,file_name,block_file_)
+
+plot_data.spec_vals_temp  = spec_vals_temp ;
+plot_data.Block_DATA = Block_DATA ;
+plot_data.mode_pairs_to_Use = mode_pairs_to_Use;
+plot_data.labels = labels;
+plot_data.std_bar_size = std_bar_size;
+plot_data.display_plots = display_plots;
+plot_data.file_name = file_name;
+plot_data.block_file_ = block_file_;
 
 if display_plots(2) ==1
 figure
@@ -364,9 +432,9 @@ end% if display_plots(2) ==1
 
 val_nos_tmp = 1:16;
 
-if display_plots(2) ==1
 
-    
+if display_plots(2) ==1
+   
 xBlanks = zeros(1, length(mode_pairs_to_Use));
 axes('XTick', 1: length(mode_pairs_to_Use), 'XLim', [0,length(mode_pairs_to_Use)+1 ], 'XTickLabel', labels(mode_pairs_to_Use));
 
@@ -377,6 +445,7 @@ title({['TEST:: ',file_name],['LB:: ',block_file_]})
 
 hold on
 end %if display_plots(2) ==1
+
 
 
 for index = 1: length(Block_DATA.Labels_)

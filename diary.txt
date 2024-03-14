@@ -1,0 +1,11 @@
+diary on
+%% Main Code
+disp("first")
+first
+pause(5)
+disp("second")
+second
+pause(5)
+disp("third")
+third
+diary off
