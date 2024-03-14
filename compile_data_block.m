@@ -4,6 +4,7 @@ function Block_DATA = compile_data_block(Percentage_Peak, Labels_)
 % Labels_ = {'not cracked','cracked'} -  default
 % Labels_ = {'zero','one','two','three','four','five'}
 % Choose a block of files and go through them  1 by one and compile the data
+
 % compile_data_block( 45 , {'not cracked','cracked'})
 % compile_data_block( 45 , {'zero','one','two','three','four','five'})
 % compile_data_block( 45 , {'not cracked','small','med','large'})
@@ -12,11 +13,10 @@ function Block_DATA = compile_data_block(Percentage_Peak, Labels_)
 % compile_data_block( 45 , {'No Crack','Crack','Large Crack'})
 %                     0  (1,2,3,4)  5
 
-
 Peak_method = 3;
-
 P_W_D = pwd;
 cd('P:\GITHUBS\AIDATA')
+
 
 %cd ('C:\Users\Dev\OneDrive\shared from tti test\AIDATA')
 [chosen_files , path]  =  uigetfile('*.*','Select the INPUT DATA FILE(s)','MultiSelect','on');

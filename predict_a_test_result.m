@@ -1,7 +1,7 @@
 %
 function  output_  =  predict_a_test_result(varargin) 
-include_ai = 0;
-include_LL = 0;
+include_ai = 1;
+include_LL = 1;
 
 
 % output_
@@ -89,7 +89,7 @@ if isnan(DATA_PATH)
 
     P_W_D = pwd ;
 %  load a block data set 
-cd('P:\GITHUBS\AIDATA')
+%cd('P:\GITHUBS\AIDATA')
 %cd('C:\Users\Dev\OneDrive\shared from tti test\AIDATA')
 [file_,path_]=uigetfile();
 DATA_PATH = [path_,file_];

@@ -4,7 +4,7 @@ plot_options  = load_structure_from_file('plot_options_.dat');
 
 if isnan(FILE_TO_PREDICT)
 P_W_D =  pwd;
-cd('P:\GITHUBS\AIDATA')
+%cd('P:\GITHUBS\AIDATA')
 %cd('C:\Users\Dev\OneDrive\shared from tti test\AIDATA')
 [file_,path_]=uigetfile();
 
