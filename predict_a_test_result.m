@@ -1,5 +1,8 @@
 %
 function  output_  =  predict_a_test_result(varargin) 
+include_ai = 0;
+include_LL = 0;
+
 
 % output_
 % output_.txt{1-11} 
@@ -30,10 +33,12 @@ function  output_  =  predict_a_test_result(varargin)
 display_plots = [1 1 1];
 diplay_txt = [1 1 1 1 1 1 1 1 1 1 1 ];
 
+
 % display_plots = [0 0 0];
 % diplay_txt = [0 0 0 0 0 0 0 0 0 0 0 ];
-
 %diplay_txt = [1 0 0 0 1 1 0 0 0 0 0 ];
+
+
 
 if nargin > 2  &&  nargin < 7
 normalising_mode_index = varargin{1};
@@ -137,8 +142,9 @@ end %for index = 1:length(Labels_)
 %dummy =  open('P:\GITHUBS\Liams_algos\Learning_block_2\AI_Block_45_PP_6_L48_DV_NN_3_mat.mat');
 % AI_Block = dummy.AI_Block;
 
-%AI_Block  = Create_AI_learning_Block(NumNeighbors,mode_pairs_to_Use, norm_crack_mode_,Block_DATA.Labels_, Block_DATA.tag_label_index );
-
+if include_ai == 1
+AI_Block  = Create_AI_learning_Block(NumNeighbors,mode_pairs_to_Use, norm_crack_mode_,Block_DATA.Labels_, Block_DATA.tag_label_index );
+end %if include_ai == 1
 
 [spec_vals, file_name, output_.plot_data{1} ] =  Get_mode_values_from_a_test(Block_DATA.Peak_method , Block_DATA.Percentage_Peak , search_limits,FILE_TO_PREDICT,display_plots);
 
@@ -146,11 +152,13 @@ SV_crack_mode = spec_vals.crack_mode;
 SV_crack_mode = SV_crack_mode./SV_crack_mode(normalising_mode_pair(1),normalising_mode_pair(2));
 spec_vals_temp = reshape(SV_crack_mode, 1 , numel(SV_crack_mode));
 
-% [return_tag,~,~] = predict(AI_Block , spec_vals_temp(mode_pairs_to_Use));
-
+if include_ai == 1
+[return_tag,~,~] = predict(AI_Block , spec_vals_temp(mode_pairs_to_Use));
+end %if include_ai == 1
 
 [Score_vals,output_.plot_data{2}]   = do_mean_std_plot(spec_vals_temp,Block_DATA,mode_pairs_to_Use,labels,std_bar_size,display_plots,file_name,block_file_);
-[score_table,log_lik_table, rank_table, within_range_table,std_dist_table, predict_tag,LL_tag]    = get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Block_DATA.Labels_,std_bar_size);
+
+[score_table,log_lik_table, rank_table, within_range_table,std_dist_table, predict_tag,LL_tag]    = get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Block_DATA.Labels_,std_bar_size,include_LL);
 
 
 output_.txt{1}='-----------------------------------------------------------------\n'                      ; 
@@ -178,16 +186,25 @@ output_.txt{4} = ['normalising_mode_pair: ',num2str(normalising_mode_pair(1)),'/
 if diplay_txt(4) ==1
 fprintf(output_.txt{4})
 end
-
-%output_.txt{5} = ['The AI predicts that this results is:   ', return_tag{1} ,' .\n'];
+if include_ai == 1
+output_.txt{5} = ['The AI predicts that this results is:   ', return_tag{1} ,' .\n'];
+else
 output_.txt{5} = 'The AI prediction currently removed \n';
+end
 
 if diplay_txt(5) ==1
 fprintf(output_.txt{5})
 end
 
+
+if include_LL ==1
 output_.txt{6} = ['The dist from mean predicts that the result is:   ',  predict_tag ,' .\n'];
 output_.txt{6} = [output_.txt{6},'The log likelyhood predicts that the result is:   ',  LL_tag ,' .\n'   ];
+else
+output_.txt{6} = ['The dist from mean predicts that the result is:   ',  predict_tag ,' .\n'];
+output_.txt{6} = [output_.txt{6},'The LL prediction currently removed \n'];
+end
+
 if diplay_txt(6) ==1
 fprintf(output_.txt{6})
 end
@@ -223,7 +240,7 @@ if diplay_txt(8) ==1
 fprintf(output_.txt{8})
 end
 
-
+if include_LL ==1
 output_.txt{9} = '-----------------------------------------------------------------\n';
 output_.txt{9} = [output_.txt{9}, 'Log Likelyhood\n'];
 output_.txt{9} = [output_.txt{9}, '-----------------------------------------------------------------\n'];
@@ -232,6 +249,11 @@ TString = evalc('disp(output_.log_lik_table)');
 output_.txt{9} = [output_.txt{9}, '-----------------------------------------------------------------\n'];
 output_.txt{9} = [output_.txt{9}, TString,                                                         '\n'];
 output_.txt{9} = [output_.txt{9}, '-----------------------------------------------------------------\n'];
+else
+output_.txt{9} = '-----------------------------------------------------------------\n';
+output_.txt{9} = [output_.txt{9},output_.txt{9}, 'The Log Likelyhood table is not included\n'];
+output_.txt{9} = [output_.txt{9},'-----------------------------------------------------------------\n'];
+end
 
 if diplay_txt(9) ==1
 fprintf(output_.txt{9})
@@ -307,7 +329,7 @@ end %for index = 1:length(crack_mode_)
 
 end% function norm_crack_mode_ = normalse_crack_modes(Block_DATA.crack_mode_,normalising_mode_pair)
 
-function [score_table,log_lik_table, rank_table,within_range_table,std_dist_table, predict_tag,LL_tag] = get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Tags_,std_bar_size)
+function [score_table,log_lik_table, rank_table,within_range_table,std_dist_table, predict_tag,LL_tag] = get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Tags_,std_bar_size,include_LL)
 
 %log_lik_table   --   to be created
 
@@ -326,12 +348,12 @@ temp_ =  100 * abs((Score_vals.Means_{index}-Score_vals.spec_vals_ ));
 score_mat(index,:) = [temp_,mean(temp_)];
 end % for index = 1 :length(Score_vals.Means_)
 
-
+if include_LL == 1
 for index = 1 :length(Score_vals.Means_)
 temp_ = round(100*abs(log( Score_vals.Stds_{index}.*pdf('Normal',Score_vals. spec_vals_ , Score_vals.Means_{index},Score_vals.Stds_{index}))))/100;
-
 log_lik(index,:) = [temp_,mean(temp_)];
 end % for index = 1 :length(Score_vals.Means_)
+end %if include_LL == 1
 
 
 for index = 1 :length(Score_vals.Means_)
@@ -366,12 +388,16 @@ score_table = array2table(score_mat,...
        'VariableNames',columns__,...
        'RowNames',Tags_); 
 
+if include_LL == 1
 log_lik_table = array2table(log_lik,...
        'VariableNames',columns__,...
        'RowNames',Tags_); 
-
 [~ ,LL_indx]  =  min(log_lik(:,end));
 LL_tag = Tags_{LL_indx};
+else
+log_lik_table = NaN;
+LL_tag        = NaN;   
+end %if include_LL == 1
 
 
 within_range_table = array2table(std_within_range_mat,...
