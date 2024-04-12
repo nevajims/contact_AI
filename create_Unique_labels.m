@@ -1,0 +1,40 @@
+function  [Labels,tag_label_index] = create_Unique_labels(File_labels , File_label_index) 
+
+Labels = unique(File_labels,'stable');
+count = 0;
+conversion_key = zeros(size(File_labels));
+
+for index = 1: length(File_labels)
+for index_2 = 1:length(Labels)
+
+if strcmp(File_labels{index},Labels{index_2})
+count = count + 1;
+conversion_key(count) = index_2;
+end %if strcmp(File_labels)
+end %for index_2 = 1:length(Labels)
+end %for index = 1: length(File_labels)
+tag_label_index = zeros(size(File_label_index)) ;
+
+for index = 1 : length(File_label_index) 
+tag_label_index(index)  =   conversion_key( File_label_index(index) ) ; 
+end %for index = 1 : length(File_label_index) 
+Unique_FLs = unique (FL_s,'stable' );
+
+Txt_ = '';
+
+for index = 1: length(Unique_FLs)
+Txt_ = [Txt_,'--------------------------------------']; 
+Txt_ = [Txt_, 'File identifier (H):  ',num2str(Unique_FLs(index)), '.'];
+Txt_ = [Txt_,'--------------------------------------'];
+type_inds =  find(tag_label_index == Unique_FLs(index));
+
+% now create the table
+
+
+
+
+end %for index = 1: length(Unique_FLs)
+
+end %  function  [Labels,tag_label_index] = create_Unique_labels(File_labels,File_label_index) 
+
+

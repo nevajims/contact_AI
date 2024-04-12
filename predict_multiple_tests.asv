@@ -1,7 +1,7 @@
 function combined_data   =  predict_multiple_tests(varargin) 
 
 
-do_plots = 0 ; 
+
 disp_overall_settings =1 ;
 
 % overall settings
@@ -97,14 +97,11 @@ cd (P_W_D)
 
 % = get_file_label() 
 
+file_label = filename_{1}(find(filename_{1}=='H')+1);
 
 if iscell(filename_)==1
 
 for index = 1:length(filename_)
-
-
-file_label = filename_{index}(find(filename_{index}=='H')+1);
-
 
 File_to_Predict = [path_,filename_{index}];
 summary_results{index} = predict_a_test_result(normalising_mode_index,std_bar_size ,mode_pairs_to_Use,search_limits,Block_file,Block_DATA, File_to_Predict, Pecentage_peak_index);

@@ -136,10 +136,12 @@ traces.dv  = dv     ;
 [max_ind, max_val,h_]  = get_point_for_mode_map(mm33,dv,P_P_P,Percentage_Peak);
 
 figure(h_)
+
 plot(dv(max_ind), max_val,'o','markersize', 10 );
 title ([tag_label,', peak = ',num2str(dv(max_ind)*1000),'mm'])
 
 fn_plot_grid_data(grid_data, plot_options ,dv(max_ind))
+
 crack_mode = grid_data.data_stack(:,:,max_ind);
 % crack_mode = crack_mode./crack_mode(1,1);
 %key_mode_values = [crack_mode(3,1),crack_mode(2,4),crack_mode(1,2),crack_mode(4,4)];

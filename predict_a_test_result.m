@@ -1,8 +1,15 @@
 %
-function  output_  =  predict_a_test_result(varargin) 
+function  output_  =   predict_a_test_result(normalising_mode_index,std_bar_size ,mode_pairs_to_Use,search_limits,DATA_PATH , Block_DATA, FILE_TO_PREDICT, PP_index)
+%  predict_a_test_result(1,2,[8,9,14,16],[0.65,0.9])
+
+%normalising_mode_index = varargin{1};
+%std_bar_size           = varargin{2};  
+%mode_pairs_to_Use      = varargin{3}; 
+%search_limits          = varargin{4};
+
+
 include_ai = 1;
 include_LL = 1;
-
 
 % output_
 % output_.txt{1-11} 
@@ -30,17 +37,15 @@ include_LL = 1;
 % mode map of the specific test at the postion identiified in Fig. 1
 % diplay_txt = [0 0 0 0 0 0 0 0 0 0 0];
 
-display_plots = [1 1 1];
-diplay_txt = [1 1 1 1 1 1 1 1 1 1 1 ];
+display_plots = [0 0 0];
+diplay_txt = [1 0 0 1 1 1 0 0 0 0 0 ];
+%diplay_txt = [1 1 1 1 1 1 1 1 1 1 1 ];
+%display_plots = [1 1 1];
+%diplay_txt = [0 0 0 0 0 0 0 0 0 0 0 ];
 
+%{
 
-% display_plots = [0 0 0];
-% diplay_txt = [0 0 0 0 0 0 0 0 0 0 0 ];
-%diplay_txt = [1 0 0 0 1 1 0 0 0 0 0 ];
-
-
-
-if nargin > 2  &&  nargin < 7
+if nargin > 2  &&  nargin < 8
 normalising_mode_index = varargin{1};
 std_bar_size           = varargin{2};  
 mode_pairs_to_Use      = varargin{3};  
@@ -57,11 +62,22 @@ DATA_PATH              = varargin{5};
     case(6)
 search_limits          = varargin{4};
 DATA_PATH              = varargin{5}; 
-FILE_TO_PREDICT        = varargin{6};   
+FILE_TO_PREDICT        = varargin{6};                     
+    case(7)
+search_limits          = varargin{4};
+DATA_PATH              = varargin{5}; 
+FILE_TO_PREDICT        = varargin{6};                     
+PP_index               = varargin{7};   
+
     otherwise
 end %switch(nargin)
 else
 end % if nargin > 2  &&  nargin < 7
+
+%}
+
+
+
 
 % DATA_PATH
 
@@ -81,12 +97,14 @@ mode_pairs=  [1,1;1,2;1,3;1,4;2,1;2,2;2,3;2,4;3,1;3,2;3,3;3,4;4,1;4,2;4,3;4,4];
 labels = {'1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3','4-4'}; 
 
 normalising_mode_pair =  mode_pairs(normalising_mode_index,:);
+
 NumNeighbors = 3 ;
 %std_bar_size = 1.5;
 show_tag_mean_mode_plots = 0 ;
 
-if isnan(DATA_PATH)
 
+%{
+if isnan(DATA_PATH)
     P_W_D = pwd ;
 %  load a block data set 
 %cd('P:\GITHUBS\AIDATA')
@@ -99,19 +117,27 @@ cd(P_W_D)
 else
 dummy =  open(strcat(DATA_PATH));
 end
+%}
+
+
 
 block_file_ = DATA_PATH(max(strfind(DATA_PATH,'\'))+1:end);
 
-
 %dummy =  open('P:\GITHUBS\Liams_algos\Learning_block_1\Block_data_45_PP_2_L8_DV.mat');
 
+%Block_DATA = dummy.Block_DATA;
+%---------------------------------------------- 
 
-Block_DATA = dummy.Block_DATA;
 
+
+
+
+
+%output_.predict_tags = Block_DATA.Labels_ ;
 Labels_ = Block_DATA.Labels_;
 tag_label_index = Block_DATA.tag_label_index;
 
-norm_crack_mode_ = normalse_crack_modes(Block_DATA.crack_mode_,normalising_mode_pair);
+norm_crack_mode_ = normalse_crack_modes(Block_DATA.crack_mode_   ,   normalising_mode_pair , PP_index );
 
 
 
@@ -146,11 +172,14 @@ if include_ai == 1
 AI_Block  = Create_AI_learning_Block(NumNeighbors,mode_pairs_to_Use, norm_crack_mode_,Block_DATA.Labels_, Block_DATA.tag_label_index );
 end %if include_ai == 1
 
-[spec_vals, file_name, output_.plot_data{1} ] =  Get_mode_values_from_a_test(Block_DATA.Peak_method , Block_DATA.Percentage_Peak , search_limits,FILE_TO_PREDICT,display_plots);
-
+[spec_vals, file_name, output_.plot_data{1} ] =  Get_mode_values_from_a_test(Block_DATA.Percentage_Peaks(PP_index)  , search_limits , FILE_TO_PREDICT , display_plots);
 SV_crack_mode = spec_vals.crack_mode;
 SV_crack_mode = SV_crack_mode./SV_crack_mode(normalising_mode_pair(1),normalising_mode_pair(2));
+
 spec_vals_temp = reshape(SV_crack_mode, 1 , numel(SV_crack_mode));
+
+output_.file_name      =  file_name;
+output_.block_file     =  DATA_PATH;
 
 if include_ai == 1
 [return_tag,~,~] = predict(AI_Block , spec_vals_temp(mode_pairs_to_Use));
@@ -158,12 +187,18 @@ end %if include_ai == 1
 
 [Score_vals,output_.plot_data{2}]   = do_mean_std_plot(spec_vals_temp,Block_DATA,mode_pairs_to_Use,labels,std_bar_size,display_plots,file_name,block_file_);
 
+
 [score_table,log_lik_table, rank_table, within_range_table,std_dist_table, predict_tag,LL_tag]    = get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Block_DATA.Labels_,std_bar_size,include_LL);
 
 
-output_.txt{1}='-----------------------------------------------------------------\n'                      ; 
-output_.txt{1}= [output_.txt{1},file_name,'\n']                                                                   ;
-output_.txt{1}= [output_.txt{1},'-----------------------------------------------------------------\n']  ;
+file_label = file_name(find(file_name =='H')+1);
+
+
+output_.txt{1}='-----------------------------------------------------------------\n'                  ; 
+output_.txt{1}= [output_.txt{1},file_name,'\n']                                                       ;
+output_.txt{1}= [output_.txt{1},'LABEL: ',file_label,'\n']                                          ;
+
+output_.txt{1}= [output_.txt{1},'-----------------------------------------------------------------\n'];
 
 if diplay_txt(1) ==1
 fprintf(output_.txt{1})
@@ -174,11 +209,11 @@ if diplay_txt(2) ==1
 fprintf(output_.txt{2})
 end
 
-
 output_.txt{3} = display_Block_data_stats(Block_DATA);
 
 if diplay_txt(3) ==1
 fprintf(output_.txt{3})
+
 end
 
 
@@ -188,8 +223,10 @@ fprintf(output_.txt{4})
 end
 if include_ai == 1
 output_.txt{5} = ['The AI predicts that this results is:   ', return_tag{1} ,' .\n'];
+output_.predict{1} = return_tag{1} ; 
 else
 output_.txt{5} = 'The AI prediction currently removed \n';
+output_.predict{1} = NaN; 
 end
 
 if diplay_txt(5) ==1
@@ -200,15 +237,21 @@ end
 if include_LL ==1
 output_.txt{6} = ['The dist from mean predicts that the result is:   ',  predict_tag ,' .\n'];
 output_.txt{6} = [output_.txt{6},'The log likelyhood predicts that the result is:   ',  LL_tag ,' .\n'   ];
+
+output_.predict{2} = predict_tag ; 
+output_.predict{3} = LL_tag ; 
+
 else
 output_.txt{6} = ['The dist from mean predicts that the result is:   ',  predict_tag ,' .\n'];
 output_.txt{6} = [output_.txt{6},'The LL prediction currently removed \n'];
+output_.predict{2} = predict_tag ; 
+output_.predict{3} = NaN ; 
+
 end
 
 if diplay_txt(6) ==1
 fprintf(output_.txt{6})
 end
-
 
 % formatted_score_table = convert_table_to_formatted_txt(score_table); 
 output_.txt{7} = '-----------------------------------------------------------------\n';
@@ -217,11 +260,10 @@ output_.txt{7} = [output_.txt{7}, '---------------------------------------------
 output_.txt{7} = [output_.txt{7}, 'Dist from mean for each mode pair\n'];
 output_.score_table = score_table;
 TString = evalc('disp(output_.score_table)');
+TString = remove_strong(TString);
 output_.txt{7} = [output_.txt{7}, '-----------------------------------------------------------------\n'];
 output_.txt{7} = [output_.txt{7}, TString,                                                         '\n'];
 output_.txt{7} = [output_.txt{7}, '-----------------------------------------------------------------\n'];
-
-
 
 if diplay_txt(7) ==1
 fprintf(output_.txt{7})
@@ -232,6 +274,7 @@ output_.txt{8} = [output_.txt{8}, 'Ranking for dist from mean\n'];
 output_.txt{8} = [output_.txt{8}, '-----------------------------------------------------------------\n'];
 output_.rank_table = rank_table;
 TString = evalc('disp(output_.rank_table)');
+TString = remove_strong(TString);
 output_.txt{8} = [output_.txt{8}, '-----------------------------------------------------------------\n'];
 output_.txt{8} = [output_.txt{8}, TString,                                                         '\n'];
 output_.txt{8} = [output_.txt{8}, '-----------------------------------------------------------------\n'];
@@ -246,6 +289,7 @@ output_.txt{9} = [output_.txt{9}, 'Log Likelyhood\n'];
 output_.txt{9} = [output_.txt{9}, '-----------------------------------------------------------------\n'];
 output_.log_lik_table = log_lik_table;
 TString = evalc('disp(output_.log_lik_table)');
+TString = remove_strong(TString);
 output_.txt{9} = [output_.txt{9}, '-----------------------------------------------------------------\n'];
 output_.txt{9} = [output_.txt{9}, TString,                                                         '\n'];
 output_.txt{9} = [output_.txt{9}, '-----------------------------------------------------------------\n'];
@@ -265,6 +309,7 @@ output_.txt{10} = [output_.txt{10}, 'Within range (+/- ',num2str(std_bar_size), 
 output_.txt{10} = [output_.txt{10}, '-----------------------------------------------------------------\n'];
 output_.within_range_table = within_range_table;
 TString = evalc('disp(output_.within_range_table)');
+TString = remove_strong(TString);
 output_.txt{10} = [output_.txt{10}, '-----------------------------------------------------------------\n'];
 output_.txt{10} = [output_.txt{10}, TString,                                                         '\n'];
 output_.txt{10} = [output_.txt{10}, '-----------------------------------------------------------------\n'];
@@ -279,6 +324,7 @@ output_.txt{11} = [output_.txt{11}, 'No. of STD dist from mean\n'];
 output_.txt{11} = [output_.txt{11}, '-----------------------------------------------------------------\n'];
 output_.std_dist_table = std_dist_table;
 TString = evalc('disp(output_.std_dist_table)');
+TString = remove_strong(TString);
 output_.txt{11} = [output_.txt{11}, '-----------------------------------------------------------------\n'];
 output_.txt{11} = [output_.txt{11}, TString,                                                         '\n'];
 output_.txt{11} = [output_.txt{11}, '-----------------------------------------------------------------\n'];
@@ -297,10 +343,8 @@ end
 
 output_.plot_data{3} = get_interp_data(spec_vals.crack_mode,50);
 if display_plots(3) ==1
-plot_interp_data(output_.plot_data{3},'SPECIFIC TEST mode plot',0.8)
+plot_interp_data(output_.plot_data{3},file_name,0.8)
 end %if display_plots(3) ==1
-
-
 end  % function   predict_a_test_result
 
 % have it so you dont have to select the boundaries  --  option to do
@@ -319,12 +363,11 @@ end %for index = 1:length(Block_DATA.Labels_)
 end %function display_Block_data_stats(Block_DATA);
 
 
+function norm_crack_mode_ = normalse_crack_modes(crack_mode_,normalising_mode_pair,PP_index)
 
-
-
-function norm_crack_mode_ = normalse_crack_modes(crack_mode_,normalising_mode_pair)
 for index = 1:length(crack_mode_)
-norm_crack_mode_(:,:,index) = crack_mode_{index} / crack_mode_{index}(normalising_mode_pair(1),normalising_mode_pair(2));
+dummy =  crack_mode_{index}{PP_index};    
+norm_crack_mode_(:,:,index) = dummy / dummy(normalising_mode_pair(1),normalising_mode_pair(2));
 end %for index = 1:length(crack_mode_)
 
 end% function norm_crack_mode_ = normalse_crack_modes(Block_DATA.crack_mode_,normalising_mode_pair)
@@ -366,9 +409,8 @@ temp_ =  Score_vals.Stds_{index};
 std_mat(index,:) = [temp_,mean(temp_)];
 end % for index = 1 :length(Score_vals.Means_)
 
-
-
 std_within_range_mat = Score_vals.spec_vals_ <= mean_mat(:,1:end-1)+std_bar_size*std_mat(:,1:end-1) & Score_vals.spec_vals_ >= mean_mat(:,1:end-1)-std_bar_size*std_mat(:,1:end-1);
+
 std_within_range_mat = [std_within_range_mat,mean(std_within_range_mat,2)];
 
 std_dist_mat = abs((mean_mat(:,1:end-1) - Score_vals.spec_vals_))  ./ std_mat(:,1:end-1);  
@@ -383,6 +425,7 @@ columns__ =  [labels(mode_pairs_to_Use),{'Mean'}];
 [~ ,Predict_index]  =  min(score_mat(:,end));
 
 predict_tag = Tags_{Predict_index};
+
 
 score_table = array2table(score_mat,...
        'VariableNames',columns__,...
@@ -510,6 +553,9 @@ axis off;
 caxis([0, db_range]);
 colorbar;
 
+title_ = remove_(title_);
+
+
 title(title_)
 
     sf = 50 / 4;
@@ -544,6 +590,30 @@ interp_data = [interp_data; zeros(1, size(interp_data, 2)) ]       ;
 interp_data = [interp_data, zeros(size(interp_data,1), 1)  ]       ;
 end % function interp_data = get_interp_data(slice_data,options,grid_size_to_plot)
 
+
+
+
+function TString = remove_strong(TString)
+
+
+lefts_  = find(TString=='<');
+rights_  = find(TString=='>');
+
+if length(lefts_ ) ~= length(rights_)
+disp('length(lefts_ ) ~= length(rights_)')
+else
+    %disp('ok')
+end
+
+for index = length(lefts_):-1:1
+TString(lefts_(index):rights_(index)) = '';
+end %for index = length(lefts_):-1:1
+
+end %function remove_strong(text_string)
+
+function text_ = remove_(text_)
+text_(find(text_=='_')) =  ' ';
+end %function text_  remove_(text_)
 
 
 

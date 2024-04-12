@@ -1,95 +1,5 @@
-function DISPLAY_AI_DATA(all_display_data , data_to_display,filename)
-
-% fid = fopen(filename, 'w');
-
-% displays that bits you seect in      data_to_display
-% put allthe disps in on output window
-
-
-% data_to_display.display_txt = [1 1 1 1 1 1 1 1 1 1 1 ]     ;
-% data_to_display.display_plots = [1 1 1]                    ; 
-% DISPLAY_AI_DATA(output_,data_to_display )
-
-
-if data_to_display.display_txt(1)== 1
-%-----------------------------------------------------------
-% DISP 1
-fprintf(fid all_display_data.txt{1})
-
-fprintf(all_display_data.txt{1})
-
-%-----------------------------------------------------------
-end
-
-if data_to_display.display_txt(2)== 1
-%-----------------------------------------------------------
-% DISP 2
-fprintf(all_display_data.txt{2})
-%-----------------------------------------------------------
-end
-
-if data_to_display.display_txt(3)== 1
-%-----------------------------------------------------------
-% DISP 3
-fprintf(all_display_data.txt{3})
-%-----------------------------------------------------------
-end
-
-if data_to_display.display_txt(4)== 1
-%-----------------------------------------------------------
-% DISP 4
-fprintf(all_display_data.txt{4})
-%-----------------------------------------------------------
-end
-
-if data_to_display.display_txt(5)== 1
-%-----------------------------------------------------------
-% DISP 5
-fprintf(all_display_data.txt{5})
-%-----------------------------------------------------------
-end
-
-if data_to_display.display_txt(6)== 1
-%-----------------------------------------------------------
-% DISP 6
-fprintf(all_display_data.txt{6})
-%-----------------------------------------------------------
-end
-
-if data_to_display.display_txt(7)== 1
-%-----------------------------------------------------------
-% DISP 7
-fprintf(all_display_data.txt{7})
-%-----------------------------------------------------------
-end
-
-if data_to_display.display_txt(8)== 1
-%-----------------------------------------------------------
-% DISP 8
-fprintf(all_display_data.txt{8})
-%-----------------------------------------------------------
-end
-
-if data_to_display.display_txt(9)== 1
-%-----------------------------------------------------------
-% DISP 9
-fprintf(all_display_data.txt{9})
-%-----------------------------------------------------------
-end
-
-if data_to_display.display_txt(10)== 1
-%-----------------------------------------------------------
-% DISP 10
-fprintf(all_display_data.txt{10})
-%-----------------------------------------------------------
-end
-
-if data_to_display.display_txt(11)== 1
-%-----------------------------------------------------------
-% DISP 11
-fprintf(all_display_data.txt{11})
-%-----------------------------------------------------------
-end
+function DISPLAY_AI_PLOTs(all_display_data , data_to_display)
+show_on_console = 0;
 
 if data_to_display.display_plots(1)== 1
 %-----------------------------------------------------------
@@ -111,12 +21,7 @@ if data_to_display.display_plots(3)== 1
 do_plot_3(all_display_data.plot_data{3} ,'SPECIFIC TEST mode plot',0.8)
 %-----------------------------------------------------------
 end
-
-end %function DISPLAY_AI_DATA(all_display_data , one_to_display)
-
-
-
-
+end %function DISPLAY_AI_PLOTs(all_display_data , data_to_display)
 
 
 
@@ -139,11 +44,7 @@ plot( [dv(upper_index),dv(upper_index)],[min(mm33),max(mm33)  ],'r')
 plot(dv(max_ind), max_val,'o','markersize', 10 );
 title (['peak = ',num2str(dv(max_ind)*1000),'mm'])
 
-
 end %function display_plot_1(plot_data)
-
-
-
 
 
 
@@ -187,8 +88,13 @@ plot(val_nos_tmp(1:length(mode_pairs_to_Use)),spec_vals_temp(mode_pairs_to_Use),
 legend([Block_DATA.Labels_,{'TEST'}],'location','EastOutside');
 
 
-
 end %function do_mean_std_plot(spec_vals,Block_DATA)
+
+
+
+
+
+
 
 
 function do_plot_3(interp_data,title_,db_range) 
@@ -221,3 +127,7 @@ for ii = 1:4
 end % for ii = 1:length(options.modes)
 
 end %function plot_interp_data(interp_data,options) 
+
+
+
+

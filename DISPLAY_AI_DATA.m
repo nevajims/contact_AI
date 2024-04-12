@@ -1,7 +1,11 @@
 function DISPLAY_AI_DATA(all_display_data , data_to_display,file_name)
 
+% data_to_display.display_txt = [1 1 1 1 1 1 1 1 1 1 1 ]     ;
+% data_to_display.display_plots = [1 1 1]                    ;
+
 fid = fopen(file_name, 'w');
-show_on_console = 1;
+show_on_console = 0;
+
 
 % displays that bits you seect in      data_to_display
 % put allthe disps in on output window
@@ -141,12 +145,13 @@ do_plot_3(all_display_data.plot_data{3} ,'SPECIFIC TEST mode plot',0.8)
 %-----------------------------------------------------------
 end
 
+fclose (fid);
+if sum(data_to_display.display_txt) > 0
+eval(['!notepad ',file_name,' &'])
+end
+
+
 end %function DISPLAY_AI_DATA(all_display_data , one_to_display)
-
-
-
-
-
 
 
 function do_plot_1(plot_data)
