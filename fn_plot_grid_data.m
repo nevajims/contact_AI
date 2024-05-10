@@ -20,7 +20,18 @@ switch(nargin)
     db_range_to_plot  =   options.db_range    ;
     grid_size_to_plot =   options.grid_size   ;
     figure_handle     =   figure              ;
+
+    case(2)
+    slice_data        =   varargin{1}         ;  
+    options           =   varargin{2}         ; 
+    distance_to_plot  =   0                   ;
+    db_range_to_plot  =   options.db_range    ;
+    grid_size_to_plot =   options.grid_size   ;
+    figure_handle     =   figure              ;
+
 end %switch(nargin)
+
+if nargin ==1|| nargin ==3
 
 if distance_to_plot < min(grid_data.distance_vector)
 distance_to_plot = min(grid_data.distance_vector);
@@ -31,6 +42,7 @@ distance_to_plot = max(grid_data.distance_vector);
 end %if distance_to_plot > max(grid_data.distance_vector)
    
 [slice_data,plot_distance]  = get_slice_data(grid_data,options,distance_to_plot,db_range_to_plot);  
+end
 
 interp_data = get_interp_data(slice_data,options,grid_size_to_plot);
 

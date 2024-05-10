@@ -19,20 +19,22 @@ for index = 1 : length(File_label_index)
 tag_label_index(index)  =   conversion_key( File_label_index(index) ) ; 
 end %for index = 1 : length(File_label_index) 
 
-%{
 
 %File_labels;
 Unique_FLs = unique (File_label_index,'stable' );
+
 %Unique_FLs = unique (FL_s,'stable' );
+
 Txt_ = '';
+
+keyboard
+
 for index = 1: length(Unique_FLs)
 Txt_ = [Txt_,'--------------------------------------']; 
 Txt_ = [Txt_, 'File identifier (H):  ',num2str(Unique_FLs(index)), '.'];
 Txt_ = [Txt_,'--------------------------------------'];
 type_inds =  find(tag_label_index == Unique_FLs(index));
 end %for index = 1: length(Unique_FLs)
-%}
-
 
 end %  function  [Labels,tag_label_index] = create_Unique_labels(File_labels,File_label_index) 
 

@@ -1,0 +1,20 @@
+copy the files from this directory  ::::
+~OneDrive\shared from tti test\RightLinesShare\SAFE_solutions
+into the current folder 
+(~\contact_wire_test\SAFE_solutions)
+
+if uploading changed program files to git hub-  do not upload these files
+(set them to ignore in the .gitignore file
+currently
+SAFE_solutions/AC-107_SOLVED_1.mat
+SAFE_solutions/AC-120_SOLVED_1.mat
+SAFE_solutions/AC-107 - 1mm_rem_SOLVED.mat
+SAFE_solutions/AC-107 - 2mm_rem_SOLVED.mat
+SAFE_solutions/AC-107 - 3mm_rem_SOLVED.mat
+SAFE_solutions/AC-107 - 4mm_rem_SOLVED.mat
+SAFE_solutions/AC-120 - 1mm_rem_SOLVED.mat
+SAFE_solutions/AC-120 - 2mm_rem_SOLVED.mat
+SAFE_solutions/AC-120 - 3mm_rem_SOLVED.mat
+SAFE_solutions/AC-120 - 4mm_rem_SOLVED.mat
+)
+note: 107 file still to be checked  --  changed-  now needs to be tested

@@ -1,0 +1,118 @@
+% ------------------------------------------------------------------------------------------------------------------------------
+% The data is between the delimiters START and END 
+% The variable name is between the %-----%    so you can add descriptive comments after the end % 
+% format is variable name (first line)  followed by value in the next line (or multiple lines if more than one dimension) 
+% there should be no meanigful spaces in the data between START and END  --  spaces will be removed
+% ------------------------------------------------------------------------------------------------------------------------------
+START
+%Sampling.Sample_RateHz%
+500000
+%Sampling.Num_Samples%
+2048
+%Sampling.Start_Offset%
+0
+%Sampling.Num_Averages%
+1
+%Sampling.RepeatDelay_mS%
+0
+%Sampling.adc_Range_options%
+2.5
+5
+10
+%Sampling.adc_Range_%
+1
+%Impedence.StartFrequency%
+1000
+%Impedence.EndFrequency%
+100000
+%Impedence.IdleFrequency%
+1000
+%Impedence.num_points%
+30
+%Impedence.num_samples%
+1024
+%Toneburst.Shape_options%
+Square
+Triang
+Hanning
+Gauss
+%Toneburst.Shape%
+4
+%Toneburst.Frequency%
+50000
+%Toneburst.num_cycles%
+6
+%Toneburst.Phase_deg%
+0
+%Toneburst.Tx_mute_samples%
+0
+%Toneburst.Tx_Channel%     
+1
+%Toneburst.Attenuation_dB%
+0
+%Instrument_attributes.number_of_transducers%
+12
+%Instrument_attributes.trans_row%
+1,1,1,1,2,2,2,2,3,3,3,3
+%Instrument_attributes.trans_pos%
+1,2,3,4,1,2,3,4,1,2,3,4
+%Instrument_attributes.trans_pos_orientation%
+0,0,1
+0,-1,0  
+0,0,1
+0,1,0
+1,0,0
+0,-1,0
+-1,0,0
+0,1,0
+1,0,0
+0,0,-1  
+-1,0,0  
+0,0,-1
+%Instrument_attributes.trans_row_pos%
+0.012,0.0,-0.012
+%TIPI_LEGACY.No_of_instruments%
+4
+%TIPI_LEGACY.SNs%
+33690,34373,33634,37075
+%TIPI_LEGACY.channels%
+13,14,0,0
+1,2,3,4
+5,6,7,8
+9,10,11,12
+%TIPI_LEGACY.ActiveChannels%
+12
+%TIPI_LEGACY.delay_factor%
+0.0
+%TIPI_LEGACY.sens%
+0.2
+%TIPI_LEGACY.resolution%
+14
+%TIPI_LEGACY.afg_pts%
+2^5
+%TIPI_LEGACY.sig_amp%
+12
+%TIPI_LEGACY.meas_delay%
+0.0
+%TIPI_LEGACY.averages_no%
+16
+%TIPI_LEGACY.pretrig%
+0
+%TIPI_LEGACY.stretch_factor%
+1
+%Model_data.fe_fnames% -2 types 120(1)and 107(2) -  107 file still to be created
+\SAFE_solutions\AC-120_SOLVED_1.mat
+\SAFE_solutions\AC-107_SOLVED.mat
+\SAFE_solutions\AC-107 - 1mm_rem_SOLVED.mat
+\SAFE_solutions\AC-107 - 2mm_rem_SOLVED.mat
+\SAFE_solutions\AC-107 - 3mm_rem_SOLVED.mat
+\SAFE_solutions\AC-107 - 4mm_rem_SOLVED.mat
+\SAFE_solutions\AC-120 - 1mm_rem_SOLVED.mat
+\SAFE_solutions\AC-120 - 2mm_rem_SOLVED.mat
+\SAFE_solutions\AC-120 - 3mm_rem_SOLVED.mat
+\SAFE_solutions\AC-120 - 4mm_rem_SOLVED.mat
+% Model_data.trans_node_list% first row for 120 2nd row for 107 (to be created)
+0
+% Model_data.real_length%
+-3,3
+END

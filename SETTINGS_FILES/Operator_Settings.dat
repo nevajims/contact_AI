@@ -1,0 +1,24 @@
+START
+%Name%
+Jim Evans
+%Sentinel_No%
+1309963
+%Notes%
+New file
+%Tower_ID%
+xNNN/NN
+%Site_name%
+TTI
+%ELR%
+1234
+%Milage%
+49.99
+%Track_ID%
+1100
+%contact_wire_type_120_107%
+1
+%feature_distance_m%
+0.66
+%wear_level_mm%
+0
+END

@@ -1,12 +1,18 @@
 function Block_DATA = compile_data_block_auto (search_limits )
 
-% Block_DATA = compile_data_block_auto ([0.65,0.8]);
-
+% Block_DATA = compile_data_block_auto ([0.65,0.9]);
+%do_plot = 0;
 % search_limits  =  [0.65,0.8];
 Percentage_Peaks = [5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100];
 
-label_key  =  {0,'clear';1,'clear';2,'monitor';3,'monitor';4,'monitor';5,'change'} ; 
-%label_key  =  {0,'zero';1,'one';2,'two';3,'three';4,'four';5,'five'} ; 
+%label_key  =  {0,'green';1,'green';2,'amber';3,'amber';4,'red';5,'red'} ; 
+
+%label_key  =  {0,'green';1,'green';2,'green';3,'amber';4,'amber';5,'red'} ; 
+
+
+%label_key  =  {0,'clear';1,'clear';2,'monitor';3,'monitor';4,'monitor';5,'change'} ; 
+
+label_key  =  { 0 , 'zero' ; 1 , 'one' ; 2 , 'two' ; 3 ,'three'; 4 ,'four'; 5 ,'five'}; 
 
 %label_key  =  {0,'no crack';1,'no crack';2,'small crack';3,'small crack';4,'Large crack';5,'Large crack'} ; 
 Labels_ = label_key(:,2)';
@@ -41,8 +47,12 @@ for index = 1 : length(chosen_files)
 for index_2 = 1:length(Percentage_Peaks)
     if index_2 == length(Percentage_Peaks)/2
     
+ %   if do_plot ==1
     display_plot = 1;
     file_{index} = chosen_files{index};
+ %   end %if do_plot ==1
+    
+    
     else
     display_plot = 0;
     end %if index_2 == length(Percentage_Peaks)
@@ -72,6 +82,8 @@ Block_DATA.search_limits     = search_limits        ;
 % ----------------------------------------------------------------------------------------------------------------------------------------------------------------%
 % this goes in the predict part
 
+cd(P_W_D)
+
 [Block_DATA.Labels_ , Block_DATA.tag_label_index] = create_Unique_labels(Block_DATA.File_labels , Block_DATA.File_label_index);
 
 %{
@@ -92,12 +104,7 @@ end %for index = 1:length(Labels_)
 %Block_DATA.mean_tag_modes_     =  mean_tag_modes_  ;
 %Block_DATA.std_tag_modes_      =  std_tag_modes_   ;
 % labels = {'1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3','4-4'} 
-
-
-
 save([path,'Block_data_',num2str(length(Labels_)) , '_L', num2str(length(chosen_files)),'_DV.mat'],'Block_DATA')
-cd(P_W_D)
-
 
 end %function compile_data_block(Percentage_of_peak, Labels_)
 % ----------------------------------------------------------------
