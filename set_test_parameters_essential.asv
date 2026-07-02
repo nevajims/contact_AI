@@ -1,0 +1,194 @@
+function test_parameters_essential = set_test_parameters_essential(varargin)
+
+switch(nargin)
+    case(0)    
+test_paramters_options
+
+test_paramters_options=load_structure_from_file_CHARS('SETTINGS_FILES\test_paramters_options.dat');
+
+
+
+data_ = test_paramters_options.data_;
+defaults_= test_paramters_options.defaults_;
+
+%-------------these should be inputs
+[fig] = bespoke_dialog_box2(data_,defaults_);
+test_parameters_essential = get_test_parameters_essential(fig);
+%-------------these should be inputs
+
+%---------------------------------------------------------------------------------------------
+end %function test_parameters_essential = set_test_parameters_essential()
+%---------------------------------------------------------------------------------------------
+
+function test_parameters_essential = get_test_parameters_essential(fig)
+Btn_pressed = 0;
+no_warnings = 0;
+fig_closed  = 0;
+
+if fig_closed  == 0
+
+while no_warnings ==0
+while Btn_pressed == 0
+drawnow()
+if isvalid(fig)
+Btn_pressed = fig.UserData.button_pressed;
+else
+test_parameters_essential = []; 
+return
+end %if ~isempty(fig)
+end %while Btn_pressed == 0
+
+
+if isvalid(fig)
+if length(fig.UserData.Warning_message) == 0
+no_warnings = 1;
+else
+wmsg_ = fig.UserData.Warning_message                       ; 
+wmsg_{length(wmsg_)+1} = ''                                ;
+wmsg_{length(wmsg_)+1} = 'IGNORE WARNINGS OR TRY AGAIN?'   ;
+answer_ = questdlg(wmsg_,'WARNINGS','Ignore','Try Again','Try Again');
+if strcmp(answer_,'Ignore') == 1
+no_warnings = 1;
+else
+no_warnings = 0;
+Btn_pressed = 0;
+fig.UserData.button_pressed = 0;
+end %if strcmp(answer_,'Ignore') == 1
+end %if length(fig.UserData.Warning_message) == 0
+end
+
+end % while no_warnings ==0;
+test_parameters_essential = fig.UserData.OPs ;
+close(fig)
+end %if fig_closed  == 0
+
+end %function test_parameters_essential = get_test_parameters_essential(fig)
+
+function fig =  bespoke_dialog_box2(data_,defaults_)
+
+fig = uifigure('Resize','off','Units','normalized','Position',[0.4,0.4,0.2,0.3],'Name', 'Input Test Parameters');
+fig.UserData.button_pressed  = 0     ;
+fig.UserData.Warning_message = ''    ;
+%----------------------------------------------------------------------------------
+%ROW 1
+%----------------------------------------------------------------------------------
+DD_1= uidropdown(fig,"Items",[data_.Track_id_options],'Position', [15 265 100 28],'FontSize',18,'Value',defaults_.Track_id);
+lbl = uilabel(fig,'Position',[15 290 100 28],'Text', 'Track ID','FontSize',18)                           ;
+fig.UserData.inps.Track_id  = DD_1                                                                 ;
+
+DD_2 =  uidropdown(fig,"Items",[data_.contact_wire_options],'Position', [145,265,100,28],'FontSize',18,'Value', defaults_.contact_wire  )   ;
+fig.UserData.inps.Contact_wire = DD_2;
+lbl2 = uilabel(fig,'Position',[145 290 100 28],'Text', 'Wire Type','FontSize',18)                          ;
+
+DD_3= uidropdown(fig,"Items",[data_.arm_present_options],'Position', [275,265,100,28],'FontSize',18,'Value',defaults_.arm_present )   ;
+lbl3 = uilabel(fig,'Position',[275 290 150 28],'Text', 'Arm Present','FontSize',18)                        ;
+fig.UserData.inps.arm_present = DD_3                                                                ;
+%----------------------------------------------------------------------------------
+%ROW 2
+%----------------------------------------------------------------------------------
+DD_4= uidropdown(fig,"Items",[data_.clamp_location_options ],'Position', [15,200,100,28],'FontSize',18,'Value',defaults_.clamp_location )   ;
+lbl4 = uilabel(fig,'Position',[15 225 150 28],'Text', 'Clamp Location','FontSize',18)                     ;
+fig.UserData.inps.clamp_location = DD_4                                                                   ;
+
+%----------------------------------------------------------------------------------
+%ROW 3
+%----------------------------------------------------------------------------------
+txa_1 = uitextarea(fig,'Position' ,[15 140 100 28],'Value','1111','FontSize',18)                          ;
+lbl5 = uilabel(fig,'Position',[15 165 100 28],'Text', 'ELR','FontSize',18)                                ;
+fig.UserData.inps.ELR                = txa_1;
+
+txa_2 = uitextarea(fig,'Position' ,[145 140 100 28],'Value','X.NNN.NN','FontSize',18)                     ;
+lbl6 = uilabel(fig,'Position',[145 165 100 28],'Text', 'Structure ID','FontSize',18)                      ;
+fig.UserData.inps.Tower_ID           = txa_2;
+
+txa_3 = uitextarea(fig,'Position' ,[275 140 100 28],'FontSize',18)                                        ;
+lbl7 = uilabel(fig,'Position',[275 165 100 28],'Text', 'Dist(miles)','FontSize',18)                       ;
+fig.UserData.inps.milage  = txa_3;
+
+%----------------------------------------------------------------------------------
+%ROW 4
+%----------------------------------------------------------------------------------
+txa_4 = uitextarea(fig,'Position' ,[15 20 230 90],'Value','','FontSize',18)                               ;
+lbl8 = uilabel(fig,'Position',[15 110 150 28],'Text', 'Notes','FontSize',18)                              ;
+fig.UserData.inps.Notes = txa_4;
+%----------------------------------------------------------------------------------
+but = uibutton(fig,"push" ,"Text","Submit",'Position',[270,30,100,55],'FontSize',18,"ButtonPushedFcn", @(src,event)ButtonPushed(fig,data_))   ;
+end %function bespoke_dialog_box(data_)
+
+function ButtonPushed(fig,data_)
+
+Warning_message = [] ;
+counter_ = 0 ;
+
+if str2num(fig.UserData.inps.ELR.Value{1})~=0
+OPs.ELR = str2num(fig.UserData.inps.ELR.Value{1});
+if OPs.ELR < str2num(data_.ELR_range_lower) || OPs.ELR > str2num(data_.ELR_range_upper)
+counter_ = counter_+1;
+Warning_message{counter_} = 'ELR should be a 4 digit number';
+end
+else
+counter_ = counter_+1;
+Warning_message{counter_} = 'ELR should be a number';
+OPs.ELR = fig.UserData.inps.ELR.Value{1};
+end %if str2num(fig.UserData.inps.Track_id)~=0
+
+
+if str2num( fig.UserData.inps.milage.Value{1})~=0
+if isempty(find(fig.UserData.inps.milage.Value{1}=='.'))
+counter_ = counter_+1;
+OPs.milage = str2num( fig.UserData.inps.milage.Value{1});
+Warning_message{counter_} = 'Distance should have 2 nums after the dp';
+else
+if length(fig.UserData.inps.milage.Value{1})- find(fig.UserData.inps.milage.Value{1}=='.') ==2
+OPs.milage =  str2num(fig.UserData.inps.milage.Value{1});
+else
+counter_ = counter_+1;
+OPs.milage = str2num( fig.UserData.inps.milage.Value{1});
+Warning_message{counter_} = 'Distance should have 2 nums after the dp';
+end %if length(fig.UserData.inps.milage{1}- find(fig.UserData.inps.milage{1}--'.')) ~=2
+end %if isempty(find(fig.UserData.inps.milage{1}=='.'))
+else
+counter_ = counter_+1;
+OPs.milage  = fig.UserData.inps.milage.Value{1};
+Warning_message{counter_} = 'Distance should be a number';
+end % if str2num( fig.UserData.inps.milage{1})~=0
+
+if isempty (fig.UserData.inps.Notes.Value{1})
+OPs.Notes = '';
+else
+OPs.Notes =  fig.UserData.inps.Notes.Value{1} ;
+end
+
+
+if strcmp(fig.UserData.inps.Track_id.Value,'Unspec')
+counter_ = counter_+1;
+Warning_message{counter_} = 'A value should be specified for Track_id.';
+end %if strcmp(fig.UserData.inps.Track_id,'Unspec')
+
+if strcmp(fig.UserData.inps.Contact_wire.Value,'Unspec')
+counter_ = counter_+1;
+Warning_message{counter_} = 'A value should be specified for Contact_wire.';
+end %if strcmp(fig.UserData.inps.Contact_wire,'Unspec')
+
+if strcmp(fig.UserData.inps.arm_present.Value,'Unspec')
+counter_ = counter_+1;
+Warning_message{counter_} = 'A value should be specified for arm_present.';
+end %if strcmp(fig.UserData.inps.arm_present,'Unspec')
+
+if strcmp(fig.UserData.inps.clamp_location.Value,'Unspec')
+counter_ = counter_+1;
+Warning_message{counter_} = 'A value should be specified for clamp_location.';
+end %if strcmp(fig.UserData.inps.clamp_location,'Unspec')
+
+
+OPs.Track_id     =    str2num(fig.UserData.inps.Track_id.Value);
+OPs.Contact_wire =    fig.UserData.inps.Contact_wire.Value;
+OPs.Tower_ID     =    fig.UserData.inps.Tower_ID.Value{1};
+OPs.arm_present  =    fig.UserData.inps.arm_present.Value;
+
+
+fig.UserData.Warning_message = Warning_message;
+fig.UserData.button_pressed = 1  ;
+fig.UserData.OPs = OPs;
+
+end %function ButtonPushedFcn(data_,login_name,txa)

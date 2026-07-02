@@ -1,0 +1,28 @@
+START
+%Login_ID%
+123
+234
+345
+456
+111
+%Name%  --  this is legacy as always '.mat' now with three fields
+Mark Evans
+Jim Evans
+Alva Gosson
+John Smith
+Calibrate
+%PW%   1- mat file    2- rmd file   
+dh
+dh
+dh
+pw
+p
+%level%
+2
+2
+2
+1
+3
+END
+
+

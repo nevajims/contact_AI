@@ -1,6 +1,7 @@
-function  [Labels,tag_label_index] = create_Unique_labels(File_labels , File_label_index) 
+function  [Labels,tag_label_index,conversion_key] = create_Unique_labels(File_labels , File_label_index) 
 
 Labels = unique(File_labels,'stable');
+
 count = 0;
 conversion_key = zeros(size(File_labels));
 
@@ -14,6 +15,8 @@ end %if strcmp(File_labels)
 end %for index_2 = 1:length(Labels)
 end %for index = 1: length(File_labels)
 tag_label_index = zeros(size(File_label_index)) ;
+
+
 
 for index = 1 : length(File_label_index) 
 tag_label_index(index)  =   conversion_key( File_label_index(index) ) ; 

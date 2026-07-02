@@ -1,0 +1,1033 @@
+function compile_test_results_paul(varargin)
+
+%  *** DONE   plot max as a lineon the key modes plot
+%  *** DONE   put text in saying
+%  ----   put in an extra plot with the stacks-  and the means-  error bars as  1 STD and  also plot the max val
+%  ----   give option for the mode to be max of stack or mean of stack
+
+
+
+
+disp_1 = 0;
+show_tabs = [1,1,1];
+initial_thresh = 0.21;
+%initial_thresh = 0.04;
+
+res_start = 200;
+window_start   = 0.25; 
+db_range = 1.6;
+% db_range = 1;
+
+%db_range = 0.75;
+
+int_VAL_2 = 12;
+mp_vals_2use_mean1_or_max0  = 1 ;
+
+min_max_or_std    =2 ;
+do_plot  = 1  ;
+do_txt = 1    ;
+
+
+
+labels = {'1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3','4-4'};
+
+mm_indices = [1,1;1,2;1,3;1,4;2,1;2,2;2,3;2,4;3,1;3,2;3,3;3,4;4,1;4,2;4,3;4,4]    ;
+
+
+% modes_to_plot = [11,6,16,14,8,9,3]; 
+% modes_to_plot = [1,6,11,16];
+% modes_to_plot = [1:16]; 
+
+
+%modes_to_plot = [11,9,10]; 
+%modes_to_plot = [1:16]; 
+modes_to_plot = [1,6,11,8,14]; 
+% --------------------------------------------------------
+% Select the test to predict
+% Start off  Just plotting the data to see how it looks
+% Using
+% 1/ Threshold for the peak
+% 2/ Number of slices 
+% 3/ Normalise to the mean of the mode pairs
+%--------------------------------------------------------
+% data checking
+%----------------------------
+% slice - location   --   within boundaries
+% Give the rms of the tranducer channels
+% Give the mode pair symmetry
+% Post normalised mode values
+%--------------------------------------------------------
+
+data_dir = 'P:\GITHUBS\AIDATA';
+P_W_D = pwd;
+        thresh_val  = varargin{1};  %  fraction  of the max value of the response
+        num_slices  = varargin{2};  %  number of slices to average over
+        
+
+sub_plots_inds = [1,1 ; 2,1 ; 3,1 ; 2,2 ; 3,2 ; 3,2 ; 4,2 ; 4,2 ; 3,3; 3,4; 3,4; 3,4 ; 4,4 ; 4,4 ; 4,4 ; 4,4; 4,5; 4,5; 4,5; 4,5; 5,5; 5,5; 5,5; 5,5; 5,5; ...
+6,5;6,5;6,5;6,5;6,5;6,6;6,6;6,6;6,6;6,6;6,6;6,7;6,7;6,7;6,7;6,7;6,7;7,7;7,7;7,7;7,7;7,7;7,7;7,7;7,7;7,8;7,8;7,8;7,8;7,8;7,8;7,8];
+
+plot_title = [ 'Threshold val: ',num2str(thresh_val), ', Num Slices: ',num2str(num_slices) ];
+
+switch(nargin)
+    case(2) %select the file manually
+        cd(data_dir)
+        [FILE_TO_PREDICT,File_path] = uigetfile('*.mat',  'mat Files (*.mat)','MultiSelect','on'); 
+        cd (P_W_D)
+       
+    case(3)
+        FILE_TO_PREDICT = varargin{3};
+end %switch(nargin)
+
+plot_options  = load_structure_from_file('plot_options_.dat');
+
+% FILE_TO_PREDICT
+if ~iscell(FILE_TO_PREDICT)
+dum = FILE_TO_PREDICT;
+clear FILE_TO_PREDICT
+FILE_TO_PREDICT{1} = dum;
+end %if iscell(FILE_TO_PREDICT)
+
+MP_mean_vals = zeros(4,4,length(FILE_TO_PREDICT));
+Position_ = zeros(length(FILE_TO_PREDICT),1);
+mod_val         = zeros(length(FILE_TO_PREDICT),1); 
+lower_val       = zeros(length(FILE_TO_PREDICT),1); 
+upper_val       = zeros(length(FILE_TO_PREDICT),1); 
+actual_peak_val = zeros(length(FILE_TO_PREDICT),1); 
+
+max_val = zeros(length(FILE_TO_PREDICT),1);...
+max_response = zeros(length(FILE_TO_PREDICT),1); sig_strength_ratio = zeros(length(FILE_TO_PREDICT),1);
+
+
+
+for index = 1: length(FILE_TO_PREDICT)
+
+subplot_tit{index} = remove_(FILE_TO_PREDICT{index}(min(find(FILE_TO_PREDICT{index}=='H')):max(find(FILE_TO_PREDICT{index}=='$')))) ;   
+
+dummy                 =     open(strcat(File_path,FILE_TO_PREDICT{index}));       
+
+grid_data            = fn_get_grid_data(dummy.rail_tester , plot_options);
+mode_map_temp             = grid_data.data_stack;
+
+
+%Traces.mm33{index}          = squeeze(mode_map(3,3,:))     ;
+%Traces.mm22{index}          = squeeze(mode_map(2,2,:))     ;
+%Traces.mm44{index}          = squeeze(mode_map(4,4,:))     ;
+%Traces.mm42{index}          = squeeze(mode_map(4,2,:))     ;
+%Traces.mm24{index}          = squeeze(mode_map(2,4,:))     ;
+%Traces.mm31{index}          = squeeze(mode_map(3,1,:))     ;
+%Traces.mm13{index}          = squeeze(mode_map(1,3,:))     ;
+
+mm33{index}          = squeeze(mode_map_temp(3,3,:))     ;
+
+mode_map{index}  = mode_map_temp;
+
+
+
+%  put in 2/2  4/4  4/2  2/4  in light colours 
+
+dv{index}            = grid_data.distance_vector                                        ; 
+
+rms_square{index}    =  squeeze(sqrt( mean((dummy.test_data.raw_data.time_data.^2))))   ;
+rms_square_response{index}    =  squeeze(sqrt( mean((dummy.test_data.raw_data.time_data(res_start:end,:,:)).^2)));
+
+
+% window_start
+% sample rate    -- 500000 Hz
+% pulse          -- 50000
+% no cycles      -- 6
+% so 10/cycle  total is 60
+%  make it first 200 samples to be sure
+
+
+
+[mod_val(index),lower_val(index),upper_val(index),actual_peak_val(index)]  =  get_peak_values(dv{index},mm33{index},initial_thresh,thresh_val,num_slices,window_start);
+
+Position_(index)        =   dv{index}(actual_peak_val(index));
+max_val(index)          =   max(mm33{index}); 
+max_response(index)     =   max(mm33{index}(find(dv{index}>window_start)));
+actual_peak_max(index)  =   mm33{index}(actual_peak_val(index));
+
+sig_strength_per(index)   = 100* max_response(index)/max_val(index);
+peak_per(index) =  100 * actual_peak_max(index)/max_val(index);
+
+
+
+[MP_stack,MP_mean,MP_max] =  get_normalised_stack_and_mean(lower_val(index),upper_val(index),mode_map_temp);
+
+MP_stack_vals{index} = MP_stack;
+MP_mean_vals(:,:,index)  = MP_mean; 
+MP_max_vals(:,:,index)  = MP_max;
+
+
+disp([num2str(index), '..'])                                   ;
+end %for index = 1: length(FILE_TO_PREDICT)
+
+
+switch (mp_vals_2use_mean1_or_max0) 
+    case(1)
+    MP_vals_to_use = MP_mean_vals;
+    mean_max_insert = 'mean';
+    case(0)    
+    MP_vals_to_use = MP_max_vals;
+    mean_max_insert = 'max';
+end
+
+if do_plot  == 1 
+
+figH_1          = plot_mode_selection_point(FILE_TO_PREDICT , dv, mm33 ,mod_val,lower_val,upper_val,plot_title,sub_plots_inds,actual_peak_val,subplot_tit);
+
+figH_2          = plot_MM_data(FILE_TO_PREDICT , plot_title , db_range , sub_plots_inds, MP_vals_to_use,subplot_tit);
+
+figH_3          = plot_principle_mode_traces(FILE_TO_PREDICT ,dv,mode_map, mm_indices, modes_to_plot, labels ,sub_plots_inds,actual_peak_val,mod_val,plot_title,subplot_tit);
+
+figH_4          = plot_mode_stats(FILE_TO_PREDICT,plot_title,subplot_tit,sub_plots_inds,MP_stack_vals,MP_mean_vals,MP_max_vals,labels, MP_vals_to_use);
+
+figH_7          = plot_MM_stack_range(FILE_TO_PREDICT,MP_stack_vals,plot_title ,  sub_plots_inds, subplot_tit, min_max_or_std  ); 
+end %if do_plot  == 1 
+
+
+[figH_5,figH_6] = plot_chan_stats(FILE_TO_PREDICT,rms_square,rms_square_response,sub_plots_inds,plot_title,subplot_tit,int_VAL_2);
+
+
+figH_8          =   plot_chan_amps(FILE_TO_PREDICT,rms_square,rms_square_response,sub_plots_inds,plot_title,subplot_tit);
+
+
+
+% figH_9          =   plot_FFTs;   ---  to do later
+
+
+
+%MP_stack_vals
+%MP_stack_vals{index} = MP_stack;
+%MP_mean_vals(:,:,index)  = MP_mean; 
+%MP_max_vals(:,:,index)  = MP_max;
+%  sub_plots_inds
+
+
+
+if do_txt  == 1 
+summerize_data_set( FILE_TO_PREDICT, thresh_val,num_slices,Position_ , rms_square,max_val , max_response,sig_strength_per,MP_vals_to_use, MP_stack_vals,show_tabs,db_range,File_path,peak_per,mean_max_insert) ;
+
+end %if do_txt  == 1 
+
+
+
+end % function predict_a_test_result_new(   )
+%-----------------------------------------------------------------
+
+function fig1      =   plot_chan_amps(file_,rms_square,rms_square_response,sub_plots_inds,plot_title,subplot_tit)
+
+
+
+
+fig1  = figure;
+
+
+for index = 1: length(file_) 
+
+subplot(sub_plots_inds(length(file_),1),sub_plots_inds(length(file_),2),index)
+
+temp_ = rms_square_response{index}-diag(diag(rms_square_response{index}));
+temp_2 = rms_square{index}-diag(diag(rms_square{index}));
+
+temp_amps = zeros(1,length(temp_ ));
+temp_amps_2 = zeros(1,length(temp_2 ));
+
+
+for index_2 = 1: length(temp_ )
+temp_amps(index_2)   =  mean([temp_(index_2,:),temp_(:,index_2)'])  ;
+temp_amps_2(index_2)   =  mean([temp_2(index_2,:),temp_2(:,index_2)']);
+end
+
+temp_amps = temp_amps / mean(temp_amps);
+
+bar(temp_amps)
+hold on
+xlim([0.5,12.5])
+ylim([0,  2*mean(temp_amps)] )
+title(subplot_tit{index})
+plot([0.5,12.5],[0.25*mean(temp_amps),0.25*mean(temp_amps)],'r')
+
+
+
+end %for index = 1: length(file_) 
+sgtitle('Respose Amplitude: norm to mean')
+
+
+
+
+
+
+end %function fig1         =   plot_chan_amps(file_,rms_square,rms_square_response,sub_plots_inds,plot_title,subplot_tit);
+
+function figH      =   plot_MM_stack_range(file_,MP_stack_vals,plot_title ,  sub_plots_inds, sb_tit, min_max_or_std )  
+
+
+figH = figure;
+
+for index = 1: length(file_) 
+
+%MP_mean_temp = MP_mean_vals(:,:,index);
+
+if min_max_or_std ==1
+
+    MP_temp = max(MP_stack_vals{1},[],3) - min(MP_stack_vals{1},[],3) ;
+
+else
+
+    MP_temp = std(MP_stack_vals{1},[],3)  ;
+
+end
+
+mode_PLOT_data_temp  =  get_interp_data(MP_temp,50);
+
+
+subplot(sub_plots_inds(length(file_),1),sub_plots_inds(length(file_),2),index)
+
+colormap default;
+surf(mode_PLOT_data_temp);
+view(2);
+axis equal;
+shading flat;
+axis off;
+
+%colorbar;
+
+title([sb_tit{index}])
+
+    sf = 50 / 4;
+    offset = 50 / 50;
+
+modes_temp = [1,2,3,4];
+
+for ii = 1:4
+    a = text((ii - 0.5) * sf + 1, - offset + 1, sprintf('%i',modes_temp(ii)));
+    set(a, 'HorizontalAlignment', 'center');
+    set(a, 'VerticalAlignment', 'top');
+
+    a = text(-offset + 1, (ii - 0.5) * sf + 1, sprintf('%i',modes_temp(ii)));
+    set(a, 'HorizontalAlignment', 'right');
+    set(a, 'VerticalAlignment', 'middle');
+
+end % for ii = 1:length(options.modes)
+
+end %for index = 1: length(file_)
+
+if min_max_or_std ==1
+insrt_ = 'max-min'   ;
+else
+insrt_ = 'std'      ;
+end %if min_max_or_std ==1
+
+sgtitle([plot_title,'...   Stack range (',insrt_ , ').'   ]) 
+
+end %function figH              = plot_MM-stack_range(FILE_TO_PREDICT,MP_stack_vals,plot_title , db_range , sub_plots_inds, MP_vals_to_use,subplot_tit ) ; 
+
+
+
+function summerize_data_set( FILE_TO_PREDICT, thresh_val,num_slices,Position_ , rms_square,max_val , max_response,sig_strength_per,MP_mean_vals, MP_stack_vals,show_tabs,db_range,File_path,peak_per,mean_max_insert) 
+% How to  create a table from a structure 
+
+
+% create the summary data tables
+channels_ = {'1','2','3','4','5','6','7','8','9','10','11','12'};
+
+channel_SYM_var = zeros(length(FILE_TO_PREDICT),length(channels_))  ;
+channel_AMP_var = zeros(length(FILE_TO_PREDICT),length(channels_))  ;
+
+for index = 1:length(FILE_TO_PREDICT)
+rms_temp = rms_square{index};
+mean_temp =  (rms_temp + rms_temp')/2;
+channel_SYM_var_tmp =   mean(abs(100.*(rms_temp-mean_temp)./rms_temp));
+
+mtdr = mean_temp-diag(diag(mean_temp));
+
+channel_AMP_var__tmp =  mean(mtdr/mean(mean(mtdr)));
+
+channel_AMP_var(index,:) =   channel_AMP_var__tmp ;
+channel_SYM_var(index,:) =   channel_SYM_var_tmp ;
+
+
+% mode amplitudes    /////    max val--   maxresponse  //  signal strength ratio
+
+
+% location  of mode_map  -----   Position_
+end %for index = 1:length(FILE_TO_PREDICT)
+
+
+
+channel_AMP_var = [channel_AMP_var,max(channel_AMP_var')',min(channel_AMP_var')',max(channel_AMP_var')'-min(channel_AMP_var')' ];
+
+
+Chan_amp_strct.Filename =   FILE_TO_PREDICT';
+Chan_amp_strct.CH1      =   channel_AMP_var(:,1);
+Chan_amp_strct.CH2      =   channel_AMP_var(:,2);
+Chan_amp_strct.CH3      =   channel_AMP_var(:,3);
+Chan_amp_strct.CH4      =   channel_AMP_var(:,4);
+Chan_amp_strct.CH5      =   channel_AMP_var(:,5);
+Chan_amp_strct.CH6      =   channel_AMP_var(:,6);
+Chan_amp_strct.CH7      =   channel_AMP_var(:,7);
+Chan_amp_strct.CH8      =   channel_AMP_var(:,8);
+Chan_amp_strct.CH9      =   channel_AMP_var(:,9);
+Chan_amp_strct.CH10     =   channel_AMP_var(:,10);
+Chan_amp_strct.CH11     =   channel_AMP_var(:,11);
+Chan_amp_strct.CH12     =   channel_AMP_var(:,12);
+Chan_amp_strct.Max      =   channel_AMP_var(:,13);
+Chan_amp_strct.Min      =   channel_AMP_var(:,14);
+Chan_amp_strct.Range    =   channel_AMP_var(:,15);
+Chan_amp_tab  = struct2table(Chan_amp_strct);
+
+
+channel_SYM_var = [channel_SYM_var,max(channel_SYM_var')',min(channel_SYM_var')',max(channel_SYM_var')'-min(channel_SYM_var')' ];
+
+Chan_sym_strct.Filename =   FILE_TO_PREDICT';
+Chan_sym_strct.CH1      =   channel_SYM_var(:,1);
+Chan_sym_strct.CH2      =   channel_SYM_var(:,2);
+Chan_sym_strct.CH3      =   channel_SYM_var(:,3);
+Chan_sym_strct.CH4      =   channel_SYM_var(:,4);
+Chan_sym_strct.CH5      =   channel_SYM_var(:,5);
+Chan_sym_strct.CH6      =   channel_SYM_var(:,6);
+Chan_sym_strct.CH7      =   channel_SYM_var(:,7);
+Chan_sym_strct.CH8      =   channel_SYM_var(:,8);
+Chan_sym_strct.CH9      =   channel_SYM_var(:,9);
+Chan_sym_strct.CH10      =  channel_SYM_var(:,10);
+Chan_sym_strct.CH11      =  channel_SYM_var(:,11);
+Chan_sym_strct.CH12      =  channel_SYM_var(:,12);
+Chan_sym_strct.Max       =  channel_SYM_var(:,13);
+Chan_sym_strct.Min       =  channel_SYM_var(:,14);
+Chan_sym_strct.Range     =  channel_SYM_var(:,15);
+
+Chan_sym_tab  = struct2table(Chan_sym_strct);
+
+gen_mode_props_strct.Filename     =  FILE_TO_PREDICT';
+gen_mode_props_strct.Position_mm  = round(10000*Position_)/10;
+gen_mode_props_strct.MAX              =   max_val/ mean(max_val) ;
+gen_mode_props_strct.RESPONE          =   max_response/ mean(max_val);
+gen_mode_props_strct.SIG_PERCENT      =   sig_strength_per' ; 
+gen_mode_props_strct.PEAK_PERCENT     =   peak_per';
+
+
+gen_mode_tab  = struct2table(gen_mode_props_strct);
+
+MP_Vals          =  reshape(MP_mean_vals,size(MP_mean_vals,1)*size(MP_mean_vals,2),size(MP_mean_vals,3))'; 
+MP_Vals_means    =  mean(MP_Vals);
+MP_Vals_std      = 100*std(MP_Vals)./mean(MP_Vals);
+
+MP_mat_temp =   [MP_Vals;MP_Vals_means;MP_Vals_std];
+
+inds = [1,5,9,13,2,6,10,14,3,7,11,15,4,8,12,16];
+
+MP_mat = MP_mat_temp(:,inds);
+
+
+%MP = {'1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4  ,'3-1','3-2','3-3','3-4   ,'4-1','4-2','4-3','4-4 };
+
+ROWS_ = FILE_TO_PREDICT ;
+ROWS_{length(ROWS_)+1}= 'Means';
+ROWS_{length(ROWS_)+1}= 'STD_%mean';
+
+MP_struct.Filenames  = ROWS_';
+MP_struct.M1_1  = MP_mat(:,1);
+MP_struct.M1_2  = MP_mat(:,2);
+MP_struct.M1_3  = MP_mat(:,3);
+MP_struct.M1_4  = MP_mat(:,4);
+MP_struct.M2_1  = MP_mat(:,5);
+MP_struct.M2_2  = MP_mat(:,6);
+MP_struct.M2_3  = MP_mat(:,7);
+MP_struct.M2_4  = MP_mat(:,8);
+MP_struct.M3_1  = MP_mat(:,9);
+MP_struct.M3_2  = MP_mat(:,10);
+MP_struct.M3_3  = MP_mat(:,11);
+MP_struct.M3_4  = MP_mat(:,12);
+MP_struct.M4_1  = MP_mat(:,13);
+MP_struct.M4_2  = MP_mat(:,14);
+MP_struct.M4_3  = MP_mat(:,15);
+MP_struct.M4_4  = MP_mat(:,16);
+
+
+MP_tab  = struct2table(MP_struct);
+
+% Mode symmetry table 
+
+
+MP_sym_mat =  [max([MP_mat(1:end-2,2)./MP_mat(1:end-2,5)   , MP_mat(1:end-2,5)./MP_mat(1:end-2,2) ]')' , max([MP_mat(1:end-2,3)./MP_mat(1:end-2,9)   , MP_mat(1:end-2,9)./MP_mat(1:end-2,3) ]')' ,max([MP_mat(1:end-2,4)./MP_mat(1:end-2,13)  , MP_mat(1:end-2,13)./MP_mat(1:end-2,4)]')' ,...  
+max([MP_mat(1:end-2,7)./MP_mat(1:end-2,10)  , MP_mat(1:end-2,10)./MP_mat(1:end-2,7)]')' , max([MP_mat(1:end-2,8)./MP_mat(1:end-2,14)  , MP_mat(1:end-2,14)./MP_mat(1:end-2,8)]')' , max([MP_mat(1:end-2,12)./MP_mat(1:end-2,15) , MP_mat(1:end-2,15)./MP_mat(1:end-2,12)]')' ] ;
+MP_sym_mat = [MP_sym_mat,max(MP_sym_mat')',min(MP_sym_mat')',max(MP_sym_mat')'-min(MP_sym_mat')' ];
+
+
+MP_sym_struct.Filenames  = ROWS_(1:end-2)';
+MP_sym_struct.M1_2_2_1 =   MP_sym_mat(:,1);
+MP_sym_struct.M1_3_3_1 =   MP_sym_mat(:,2);
+MP_sym_struct.M1_4_4_1 =   MP_sym_mat(:,3);
+MP_sym_struct.M2_3_3_2 =   MP_sym_mat(:,4);
+MP_sym_struct.M2_4_4_2 =   MP_sym_mat(:,5);
+MP_sym_struct.M3_4_4_3 =   MP_sym_mat(:,6);
+MP_sym_struct.Max      =   MP_sym_mat(:,7);
+MP_sym_struct.Min      =   MP_sym_mat(:,8);
+MP_sym_struct.Range    =   MP_sym_mat(:,9);
+
+M_sym_tab  = struct2table(MP_sym_struct);
+
+
+
+
+MP_STACK_SOM = zeros(length(MP_stack_vals),numel(MP_stack_vals{1}(:,:,1)));
+
+for index = 1: length(MP_stack_vals)
+
+MP_STACK_temp = MP_stack_vals{index};
+MP_STACK_temp2=  reshape(MP_STACK_temp,size(MP_STACK_temp,1)*size(MP_STACK_temp,2),size(MP_STACK_temp,3))';
+MP_STACK_std_ov_mean_temp = 100*std(MP_STACK_temp2)./mean(MP_STACK_temp2);
+MP_STACK_SOM(index ,:) = MP_STACK_std_ov_mean_temp;
+end %for index = 1: length(MP_stack_vals)
+
+
+
+MP_STACK_std_ov_mean = MP_STACK_SOM(:,inds);
+
+MP_STACK_std_ov_mean = [MP_STACK_std_ov_mean,mean(MP_STACK_std_ov_mean,2),max(MP_STACK_std_ov_mean')'];
+
+
+% mean
+% max
+
+
+MP_STACK_std_ov_mean = [MP_STACK_std_ov_mean;mean(MP_STACK_std_ov_mean)];
+MP_STACK_std_ov_mean = [MP_STACK_std_ov_mean ;  100*std(MP_STACK_std_ov_mean)./mean((MP_STACK_std_ov_mean))];
+
+
+
+%---------------------------------------------------------
+%---------------------------------------------------------
+
+MP_SSOM_struct.Filenames  = ROWS_';
+
+MP_SSOM_struct.M1_1  = MP_STACK_std_ov_mean(:,1);
+MP_SSOM_struct.M1_2  = MP_STACK_std_ov_mean(:,2);
+MP_SSOM_struct.M1_3  = MP_STACK_std_ov_mean(:,3);
+MP_SSOM_struct.M1_4  = MP_STACK_std_ov_mean(:,4);
+MP_SSOM_struct.M2_1  = MP_STACK_std_ov_mean(:,5);
+MP_SSOM_struct.M2_2  = MP_STACK_std_ov_mean(:,6);
+MP_SSOM_struct.M2_3  = MP_STACK_std_ov_mean(:,7);
+MP_SSOM_struct.M2_4  = MP_STACK_std_ov_mean(:,8);
+MP_SSOM_struct.M3_1  = MP_STACK_std_ov_mean(:,9);
+MP_SSOM_struct.M3_2  = MP_STACK_std_ov_mean(:,10);
+MP_SSOM_struct.M3_3  = MP_STACK_std_ov_mean(:,11);
+MP_SSOM_struct.M3_4  = MP_STACK_std_ov_mean(:,12);
+MP_SSOM_struct.M4_1  = MP_STACK_std_ov_mean(:,13);
+MP_SSOM_struct.M4_2  = MP_STACK_std_ov_mean(:,14);
+MP_SSOM_struct.M4_3  = MP_STACK_std_ov_mean(:,15);
+MP_SSOM_struct.M4_4  = MP_STACK_std_ov_mean(:,16);
+MP_SSOM_struct.Mean  = MP_STACK_std_ov_mean(:,17);
+MP_SSOM_struct.Max   = MP_STACK_std_ov_mean(:,18);
+
+
+MP_SSOM_tab  = struct2table(MP_SSOM_struct);
+%---------------------------------------------------------
+%---------------------------------------------------------
+
+
+mean_mode_map = mean(MP_mean_vals,3);
+
+figure
+sub_1 = subplot(2,1,1);
+
+plot_MM_single( db_range , mean_mode_map,sub_1,'mean mode map' );
+
+sub_2 = subplot(2,1,2);
+std_mean_mode_map = 100*std(MP_mean_vals,0,3)./mean(MP_mean_vals,3);
+
+
+
+plot_MM_single( 25, std_mean_mode_map,sub_2,'std mode map');
+sgtitle('Mean and Std of Mode Map (all tests as % o mean)')
+
+
+if show_tabs(1) == 1
+disp('------------------------------------------------------------------')
+disp('Channel Amplitude Varation RMS of all(S+R) time traces with Chan X')
+disp('------------------------------------------------------------------')
+disp(Chan_amp_tab)
+
+
+disp('--------------------------------------------')
+disp('Channel symetry Varation ChX-CHY vs CHY-CHX ')
+disp('--------------------------------------------')
+disp(Chan_sym_tab)
+
+end % if show_tabs(1) == 1
+
+
+if show_tabs(2) == 1
+disp('--------------------------------------------')
+disp('Mode 3-3 properties and peak Position ')
+disp('--------------------------------------------')
+disp(gen_mode_tab)
+disp('--------------------------------------------')
+disp('--------------------------------------------')
+disp('Mode values/test +means and STD ')
+disp('--------------------------------------------')
+disp(MP_tab)
+
+disp('--------------------------------------------')
+disp('Mode symmetry ')
+disp('--------------------------------------------')
+
+disp(M_sym_tab)
+disp('--------------------------------------------')
+
+% Position_mm
+end %if show_tabs(2) == 1
+
+if show_tabs(3) == 1
+disp('--------------------------------------------')
+disp('Mode value stack variations /test and mean std o combined ')
+disp('--------------------------------------------')
+disp(MP_SSOM_tab)
+end %if show_tabs(3) == 1
+
+
+
+disp('--------------------------------------------------')
+disp('-------------------SUMMARY DATA-------------------')
+disp(['Threshhold value = ',num2str(thresh_val*100), '% of response max signal,  # total slices = ',num2str(num_slices),'.'])
+disp(['Mode pair values taken as the ',mean_max_insert,' for each mode pair in the stack.']) 
+disp('--------------------------------------------------')
+disp(['Files from: ', File_path,'.'])
+disp('--------------------------------------------------')
+disp('--------------------------------------------')
+disp('KEY VALUES---------')
+disp('--------------------------------------------')
+disp(['Mean position  = ',num2str(mean( gen_mode_props_strct.Position_mm)) ])
+disp(['STD/Mean (mean variation of the position)  = ',  num2str(100* std(gen_mode_props_strct.Position_mm) / mean( gen_mode_props_strct.Position_mm)),' %.'])
+disp('--------------------------------------------')
+disp(['MEAN of the all STDs (of the mode pairs) = ',num2str(mean(MP_Vals_std)),'%'])
+disp('--------------------------------------------')
+
+
+end %function summerize_data_set( FILE_TO_PREDICT, thresh_val,num_slices,Position_ , rms_square,max_val , max_response,sig_strength_ratio,MP_mean_vals, MP_stack_vals) ;
+%----------------------------------------------------------------- 
+%-----------------------------------------------------------------
+
+
+function [fig1,fig2] =  plot_chan_stats(file_,rms_square,rms_square_response,sub_plots_inds,plot_title,subplot_tit,int_VAL)
+
+fig1 = figure;
+channels_ = {'1','2','3','4','5','6','7','8','9','10','11','12'}  ;
+
+
+
+
+for index = 1: length(file_) 
+
+subplot(sub_plots_inds(length(file_),1),sub_plots_inds(length(file_),2),index)
+% get the max of the diag
+
+%----------------------------------------
+%multiplier_1 =   (1 * max(max((rms_square{index} -diag(diag(rms_square{index}))))))/(max(max(diag(rms_square{index}))));
+%----------------------------------------
+
+multiplier_1 = 1;
+
+DATA_ =rms_square{index} -diag(diag(rms_square{index})*multiplier_1);
+DATA_I  =  get_interp_data(DATA_,int_VAL);
+
+colormap default;
+surf(DATA_I);
+view(2);
+axis equal;
+shading flat;
+axis off;
+%colorbar;
+
+sf = int_VAL/ 12;
+offset = int_VAL / 50;
+
+modes_temp = [1,2,3,4,5,6,7,8,9,10,11,12];
+
+for ii = 1:12
+    a = text((ii - 0.5) * sf + 1, - offset + 1, sprintf('%i',modes_temp(ii)));
+    set(a, 'HorizontalAlignment', 'center');
+    set(a, 'VerticalAlignment', 'top');
+
+    a = text(-offset + 1, (ii - 0.5) * sf + 1, sprintf('%i',modes_temp(ii)));
+    set(a, 'HorizontalAlignment', 'right');
+    set(a, 'VerticalAlignment', 'middle');
+
+end % for ii = 1:length(options.modes)
+
+title(subplot_tit{index})
+
+end %for index = 1: length(file_) 
+
+%surf(DATA_)
+%view(2)
+%xlim([1,12])
+%ylim([1,12])
+sgtitle(['SIGNAL- RMS' plot_title])
+
+
+
+
+fig2  = figure;
+
+for index = 1: length(file_) 
+subplot(sub_plots_inds(length(file_),1),sub_plots_inds(length(file_),2),index)
+
+%----------------------------------------
+%multiplier_2 =   (1*max(max((rms_square_response{index} -diag(diag(rms_square_response{index}))))))/(max(max(diag(rms_square_response{index}))));
+%----------------------------------------
+multiplier_2 = 1;
+
+DATA_2 =rms_square_response{index} -diag(diag(rms_square_response{index})*multiplier_2);
+
+
+DATA_II  =  get_interp_data(DATA_2,int_VAL);
+
+colormap default;
+surf(DATA_II);
+view(2);
+axis equal;
+shading flat;
+axis off;
+%colorbar;
+
+sf = int_VAL/ 12;
+offset = int_VAL / 50;
+
+modes_temp = [1,2,3,4,5,6,7,8,9,10,11,12];
+
+for ii = 1:12
+    a = text((ii - 0.5) * sf + 1, - offset + 1, sprintf('%i',modes_temp(ii)));
+    set(a, 'HorizontalAlignment', 'center');
+    set(a, 'VerticalAlignment', 'top');
+
+    a = text(-offset + 1, (ii - 0.5) * sf + 1, sprintf('%i',modes_temp(ii)));
+    set(a, 'HorizontalAlignment', 'right');
+    set(a, 'VerticalAlignment', 'middle');
+
+end % for ii = 1:length(options.modes)
+
+
+
+%surf(DATA_2)
+%view(2)
+%title(subplot_tit{index})
+%axis equal
+%xlim([1,12])
+%ylim([1,12])
+end %for index = 1: length(file_) 
+
+
+sgtitle(['RESPONSE- RMS' plot_title]);
+
+end %function fig = plot_chan_stats(FILE_TO_PREDICT,rms_square)
+
+function [mod_val  , lower_val  ,  upper_val  ,  actual_peak_val]  =  get_peak_values(dv,mm33,initial_thresh,thresh_val,num_slices,window_start)
+
+start_val       =   min(find(dv>window_start)) + min(find(mm33(find(dv>window_start))  >   max(mm33(find(dv>window_start)))*initial_thresh))-1;
+mm33_s = mm33(start_val:start_val+200);
+mm33_s_diff = diff(mm33_s);
+dum_ = find(mm33_s_diff>0);
+DV2 = dum_(find(diff(dum_)>1));
+actual_peak_val = DV2(1)+ start_val;
+actual_max_val = mm33(actual_peak_val);
+target_val=  actual_max_val*thresh_val;
+
+temp_val = actual_peak_val;
+peak_found =0;
+while peak_found ==0
+temp_val = temp_val -1;
+if mm33(temp_val) <= target_val
+   mod_val = temp_val;
+   peak_found =1;
+end    
+
+end % while peak_not_found ==1
+lower_val     =   mod_val-floor(num_slices/2);
+upper_val     =   mod_val+floor(num_slices/2);
+
+do_plot = 0;
+
+if do_plot ==1
+plot(dv,mm33)
+hold on
+plot(dv(start_val),mm33(start_val),'g.','markersize',20)
+plot(dv(actual_peak_val),mm33(actual_peak_val),'g.','markersize',20)
+
+plot(dv(mod_val),mm33(mod_val),'r.','markersize',30)
+plot(dv(lower_val),mm33(lower_val),'r.','markersize',10)
+plot(dv(upper_val),mm33(upper_val),'r.','markersize',10)
+end % if do_plot ==1
+
+end % function [mod_val  , lower_val  ,  upper_val  ,  actual_peak_val]  =  get_peak_values(dv,mm33,initial_thresh,thresh_val,num_slices)
+
+function plot_MM_single( db_range , MP_mean_vals,sub_plot,subplot_tit)
+subplot(sub_plot)
+
+mode_PLOT_data_temp  =  get_interp_data(MP_mean_vals,50);
+colormap default;
+surf(mode_PLOT_data_temp);
+view(2);
+axis equal;
+shading flat;
+axis off;
+caxis([0, db_range]);
+%colorbar;
+
+sf = 50 / 4;
+offset = 50 / 50;
+
+modes_temp = [1,2,3,4];
+
+for ii = 1:4
+    a = text((ii - 0.5) * sf + 1, - offset + 1, sprintf('%i',modes_temp(ii)));
+    set(a, 'HorizontalAlignment', 'center');
+    set(a, 'VerticalAlignment', 'top');
+
+    a = text(-offset + 1, (ii - 0.5) * sf + 1, sprintf('%i',modes_temp(ii)));
+    set(a, 'HorizontalAlignment', 'right');
+    set(a, 'VerticalAlignment', 'middle');
+
+end % for ii = 1:length(options.modes)
+
+
+title(subplot_tit)
+end %function figH=  plot_MM_single( db_range , MP_mean_vals)
+
+function figH=  plot_MM_data(file_ , plot_title , db_range , sub_plots_inds, MP_mean_vals,sb_tit)
+figH = figure;
+
+for index = 1: length(file_) 
+
+
+
+MP_mean_temp = MP_mean_vals(:,:,index);
+
+mode_PLOT_data_temp  =  get_interp_data(MP_mean_temp,50);
+
+subplot(sub_plots_inds(length(file_),1),sub_plots_inds(length(file_),2),index)
+
+colormap default;
+surf(mode_PLOT_data_temp);
+view(2);
+axis equal;
+shading flat;
+axis off;
+caxis([0, db_range]);
+
+%colorbar;
+
+title([sb_tit{index}])
+
+    sf = 50 / 4;
+    offset = 50 / 50;
+
+modes_temp = [1,2,3,4];
+
+for ii = 1:4
+    a = text((ii - 0.5) * sf + 1, - offset + 1, sprintf('%i',modes_temp(ii)));
+    set(a, 'HorizontalAlignment', 'center');
+    set(a, 'VerticalAlignment', 'top');
+
+    a = text(-offset + 1, (ii - 0.5) * sf + 1, sprintf('%i',modes_temp(ii)));
+    set(a, 'HorizontalAlignment', 'right');
+    set(a, 'VerticalAlignment', 'middle');
+
+end % for ii = 1:length(options.modes)
+
+end %for index = 1: length(file_)
+
+sgtitle(plot_title) 
+
+
+end %function plot_interp_data(interp_data,title_,db_range)
+
+
+function figH = plot_principle_mode_traces(file_ ,dv,mode_map, mm_indices, modes_to_plot, labels ,sub_plots_inds,actual_peak_val,mod_val,plot_title,subplot_tit)
+figH = figure ;
+
+
+
+
+for index = 1: length(file_) 
+
+ subplot(sub_plots_inds(length(file_),1),sub_plots_inds(length(file_),2),index)
+
+%  mm_indices(modes_to_plot(1),:)
+
+temp_trace =    squeeze(mode_map{index}(mm_indices(modes_to_plot(1),1),mm_indices(modes_to_plot(1),2),:));
+addit_ = max(temp_trace);
+plot(dv{index},temp_trace + 0.7*addit_*(length(modes_to_plot)-1)) ;
+
+
+if index == length(file_) 
+leg_txt =  ['legend(''',labels{modes_to_plot(1)},'''',','];
+end %if index == length(file_) 
+
+hold on
+
+count_ = length(modes_to_plot)-1;
+
+for index_2 = 2:length(modes_to_plot)
+count_ = count_-1;
+temp_trace =    squeeze(mode_map{index}(mm_indices(index_2,1),mm_indices(index_2,2),:));
+plot(dv{index}, addit_*(0.7*(count_)) + temp_trace)
+
+if index == length(file_) 
+leg_txt =  [leg_txt,'''', labels{modes_to_plot(index_2)},'''',','];
+end %if index == length(file_) 
+
+end %for index_2 = 1 : length(modes_to_plot   )
+
+y_lims = ylim;
+
+plot([dv{index}(actual_peak_val(index)),dv{index}(actual_peak_val(index))],[y_lims(1),y_lims(2)],'k:')
+plot([dv{index}(mod_val(index)),dv{index}(mod_val(index))],[y_lims(1),y_lims(2)],'r')
+
+title(subplot_tit{index})
+end % for index = 1: length(file_)
+
+leg_txt = [leg_txt,'''Peak''',',','''Used val''',',','''Location''',',','''southoutside''',',','''orientation''',',','''vertical''',')'];
+eval(['leg_ =' ,  leg_txt,';'] );
+
+figH.Position(3)=figH.Position(3)+400;
+leg_.Position = [0.0161,0.3143,0.0969,0.5000];
+sgtitle(plot_title) 
+
+
+
+end %function figH = plot_principle_mode_traces(  )
+
+function  figH=  plot_mode_selection_point(file_,dv,mm33,mod_val,lower_val,upper_val,plot_title , sub_plots_inds,actual_peak_val,subplot_tit)
+figH = figure ;
+
+
+
+
+for index = 1: length(file_) 
+subplot(sub_plots_inds(length(file_),1),sub_plots_inds(length(file_),2),index)
+
+plot(dv{index},mm33{index})
+hold on
+plot(dv{index}(mod_val(index)),mm33{index}(mod_val(index)),'g.','MarkerSize',25)
+plot(dv{index}(lower_val(index)),mm33{index}(lower_val(index)),'r.','MarkerSize',10)
+plot(dv{index}(upper_val(index)),mm33{index}(upper_val(index)),'r.','MarkerSize',10)
+plot(dv{index}(actual_peak_val(index)),mm33{index}(actual_peak_val(index)),'k.','MarkerSize',20)
+title(subplot_tit{index})
+end % for index = 1: length(file_)
+
+
+sgtitle(plot_title) 
+
+end % function plot_mode_selection_point(file_,dv,mm33,mod_val,lower_val,upper_val)
+
+function display_test(file_,max_val,max_response,sig_strength_ratio,Position_)
+
+for index= 1:length(file_) 
+
+disp('-------------------------------------')
+if iscell(file_)
+disp(['File_name: ',file_{index}])                  ;
+else    
+disp(['File_name: ',file_])                         ;
+end %if iscell(FILE_TO_PREDICT)
+
+
+disp(['Max val      = '      ,  num2str(max_val(index))])            ;
+disp(['Max response = '      ,  num2str(max_response(index))])       ;
+disp(['Sig Strength Ratio: ' ,  num2str(sig_strength_ratio(index))])       ;
+disp(['Mode Location: '      ,  num2str(Position_(index)*1000),' mm'])      ;
+disp('-------------------------------------')
+end %for index= 1:length(file_)
+end %function display_test(file_,max_val,max_response,sig_strength_ratio,Position_)
+
+function figH = plot_mode_stats(file_,plot_title,subplot_tit,sub_plots_inds,MP_stack_vals,MP_mean_vals,MP_max_vals,labels, MP_vals_to_use)
+
+
+
+figH = figure;
+
+x_vals = [1:16]' ;
+
+for index = 1: length(file_) 
+    
+subplot(sub_plots_inds(length(file_),1),sub_plots_inds(length(file_),2),index)
+% plot(dv{index},traces.mm33{index})
+title(subplot_tit{index})
+hold on
+
+std_s  =   reshape(std(MP_stack_vals{index},[],3), numel(std(MP_stack_vals{index},[],3)),1)    ;  
+max_s =   reshape(max(MP_stack_vals{index},[],3), numel(max(MP_stack_vals{index},[],3)),1)    ;
+min_s =   reshape(min(MP_stack_vals{index},[],3), numel(min(MP_stack_vals{index},[],3)),1)    ;
+
+MP_VTU =  reshape(MP_vals_to_use(:,:,index),numel(MP_vals_to_use(:,:,index)),1)       ;
+mean_s = reshape(MP_mean_vals(:,:,index),numel(MP_mean_vals(:,:,index)),1)                    ;
+errorbar(x_vals,mean_s,mean_s-min_s,abs(mean_s-max_s),':o')
+xlim([0,17])
+xticks([1:16])
+xticklabels(labels)
+plot(x_vals,MP_VTU,'s','markersize',10)
+% MP_mean_vals
+end %for index = 1: length(file_) 
+leg_ = legend('Mean','Val Used','Location','westoutside','orientation','vertical');
+figH.Position(3)=figH.Position(3)+400;
+leg_.Position = [0.04,0.3543,0.05,0.45000];
+sgtitle(plot_title) 
+
+
+end %function figH = plot_mode_stats(plot_title,subplot_tit,sub_plots_inds,MP_stack_vals,MP_mean_vals,MP_max_vals,labels, MP_vals_to_use);
+
+function [MP_stack,MP_mean,MP_max] = get_normalised_stack_and_mean(lower_val,upper_val,mode_map)
+
+MP_stack = zeros(4,4,upper_val-lower_val);
+count = 0;
+
+for index = lower_val:upper_val
+count = count + 1;
+temp_MM =mode_map(:,:,index);
+
+MP_stack(:,:,count) = temp_MM./mean(temp_MM);
+%MP_stack(:,:,count) = temp_MM./temp_MM(1,1);
+%MP_stack(:,:,count) = temp_MM;
+
+end  % for index = lower_val:upper_val
+
+MP_mean = mean(MP_stack,3);
+MP_max =  max(MP_stack,[],3);
+
+end %function [MP_stack,MP_mean] = get_normalised_stack_and_mean(lower_val,upper_val,mode_map)
+
+
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+%-----------------------------------------------------------------
+
+ %--------------------------------------
+%   TIDY UP
+% ***DONE (a) PUT BACKIN MAIN FUNCTION
+% ***DONE (b) Split off the plots into subfuctions
+%--------------------------------------
+%--------------------------------------
+%  get the following comparative stats
+%--------------------------------------
+%--------------------------------------
+% ***DONE (a) got****  mode map position 
+% ***DONE (b) got**** mode symmetry
+% ***DONE (c) got**** mode values
+% ***DONE (d) got**** channel RMS
+% ***DONE (e) got**** mean and std for each mode pair
+% ***DONE (f) plot the mean mode map  //  plot the std mode map   
+%--------------------------------------
+%--------------------------------------
+
+
+
+
+
+
+
+
+

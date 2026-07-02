@@ -3,6 +3,7 @@ function Block_DATA = compile_data_block_auto (search_limits )
 % Block_DATA = compile_data_block_auto ([0.65,0.9]);
 %do_plot = 0;
 % search_limits  =  [0.65,0.8];
+
 Percentage_Peaks = [5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100];
 
 %label_key  =  {0,'green';1,'green';2,'amber';3,'amber';4,'red';5,'red'} ; 
@@ -10,9 +11,11 @@ Percentage_Peaks = [5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]
 %label_key  =  {0,'green';1,'green';2,'green';3,'amber';4,'amber';5,'red'} ; 
 
 
-%label_key  =  {0,'clear';1,'clear';2,'monitor';3,'monitor';4,'monitor';5,'change'} ; 
+label_key  =  {0,'clear'; 1,'clear'; 2,'monitor'; 3,'monitor'; 4,'change'} ; 
 
-label_key  =  { 0 , 'zero' ; 1 , 'one' ; 2 , 'two' ; 3 ,'three'; 4 ,'four'; 5 ,'five'}; 
+%label_key  =  { 0 , 'zero' ; 1 , 'one' ; 2 , 'two' ; 3 ,'three'; 4 ,'four'};
+
+%label_key  =  { 0 , 'zero' ; 1 , 'one' ; 2 , 'two' ; 3 ,'three'; 4 ,'four'; 5 ,'five'}; 
 
 %label_key  =  {0,'no crack';1,'no crack';2,'small crack';3,'small crack';4,'Large crack';5,'Large crack'} ; 
 Labels_ = label_key(:,2)';
@@ -58,9 +61,8 @@ for index_2 = 1:length(Percentage_Peaks)
     end %if index_2 == length(Percentage_Peaks)
     
     [traces{index}{index_2}, Peak_loc(index,index_2), crack_mode_{index}{index_2} ] =  Get_single_test_values ( Percentage_Peaks(index_2) , chosen_files{index} , path , Labels_,tag_label_index(index), search_limits,display_plot);    
+        
     
-    
-
 
 end %for index_2 = 1:length(Percentage_Peaks)
 end %for index = 1 : length(chosen_files)
@@ -259,10 +261,6 @@ for index = 1: length(chosen_files)
 tag_label_index(index) = find([label_key{:,1}]== str2num(chosen_files{index}(find(chosen_files{index}=='H')+1)));
 end %for index = 1: length(chosen_files)
 end %function tag_label_index =  assign_labels(label_key,chosen_files) 
-
-
-
-
 
 function text_ = remove_(text_)
 text_(find(text_=='_')) =  ' ';

@@ -1,7 +1,7 @@
 function create_processed_data__for_multiple_data_files()
 
 % Use fixed operator/test settings or current values from SETTINGS_FILES
-use_current_O_T_settings = 0 ;    %(current means not from fixed values at time of test)
+use_current_O_T_settings = 0;    %(current means not from fixed values at time of test)--- 0  should be normal
 
 if use_current_O_T_settings == 1
 cd ('SETTINGS_FILES')
@@ -65,8 +65,9 @@ test_data.fixed_Test_Settings       = test_settings_from_folder       ;
 test_data.fixed_Operator_Settings   = operator_settings_from_folder   ;
 end %if use_current_O_T_settings == 1   % current not fixed           ;
 
-[rail_tester,loaded_fe_file_ok ]  =  create_rail_tester_structure(default_options,dummy_.test_data,proc_options);
-
+%********************************************
+%[rail_tester,loaded_fe_file_ok ]  =  create_rail_tester_structure(default_options,dummy_.test_data,proc_options);
+[rail_tester,loaded_fe_file_ok ]  =  create_rail_tester_structure(default_options,test_data,proc_options);
 if loaded_fe_file_ok ==1
 rail_tester = fn_process_rail_data(rail_tester,proc_options);
 

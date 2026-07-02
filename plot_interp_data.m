@@ -12,7 +12,6 @@ colorbar;
 
 title_ = remove_(title_);
 
-
 title(title_)
 
     sf = 50 / 4;

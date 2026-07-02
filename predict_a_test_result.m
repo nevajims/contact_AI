@@ -1,8 +1,8 @@
 function  output_  =   predict_a_test_result(varargin)
 
+
 % function  output_  =   predict_a_test_result(normalising_mode_index,std_bar_size ,mode_pairs_to_Use,search_limits, DATA_PATH , Block_DATA, FILE_TO_PREDICT, PP_index)
 % 2 options for input  
-
 % for use with predict_multiple_tests (8)
 %-------------------------------------
 % its called with another function  
@@ -13,18 +13,20 @@ function  output_  =   predict_a_test_result(varargin)
 % for use as stand alone (4) (5)
 %-------------------------------------
 % 4 ---  predict_a_test_result(1,2,[8,9,14,16],[0.65,0.9])
+
 % 5 ---  predict_a_test_result(1,2,[8,14],[0.65,0.9],'P:\GITHUBS\AIDATA\120-4bolt-no-wear\Processed_data\Block_data_6_L65_DV _LongWIN.mat')
+
 %  (normalising_mode_index , std_bar_size , mode_pairs_to_Use , search_limits)
 %-------------------------------------
-
-
+%
+% normalising mode pair-  make new one as 17--  mean of all
 run_the_program = 1;
 
-diplay_txt = [1 0 0 0 0 0 0 0 0 0 0];
-%diplay_txt  = [1 1 1 1 1 1 1 1 1 1 1];
+%diplay_txt = [1 0 0 0 0 0 0 0 0 0 0];
+diplay_txt  = [1 1 1 1 1 1 1 1 1 1 1];
+%display_plots = [0 0 0];
+display_plots = [1 1 1];
 
-display_plots = [0 0 0];
-%display_plots = [1 1 1];
 
 switch(nargin)
     case(8)
@@ -43,6 +45,7 @@ std_bar_size           = varargin{2};
 mode_pairs_to_Use      = varargin{3};
 search_limits          = varargin{4};
 P_W_D = pwd ;
+
 cd('P:\GITHUBS\AIDATA')
 [file_,path_]=uigetfile();
 DATA_PATH = [path_,file_];
@@ -66,6 +69,7 @@ if run_the_program ==1
 
 
 if nargin == 4 || nargin == 5  
+
 dummy = open(DATA_PATH);
 Block_DATA = dummy.Block_DATA;
 
@@ -82,14 +86,14 @@ cd (P_W_D)
 FILE_TO_PREDICT = [path_,filename_];
 end %if nargin == 4 || nargin == 5  
 
+
+
 include_ai = 1;
 include_LL = 1;
-
 mode_pairs=  [1,1;1,2;1,3;1,4;2,1;2,2;2,3;2,4;3,1;3,2;3,3;3,4;4,1;4,2;4,3;4,4];
-
-labels = {'1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3','4-4'}; 
-
+labels = {'1-1','1-2','1-3','1-4','2-1','2-2','2-3','2-4','3-1','3-2','3-3','3-4','4-1','4-2','4-3','4-4','mean of all'}; 
 normalising_mode_pair =  mode_pairs(normalising_mode_index,:);
+
 
 NumNeighbors = 3 ;
 %std_bar_size = 1.5;
@@ -105,31 +109,23 @@ block_file_ = DATA_PATH(max(strfind(DATA_PATH,'\'))+1:end);
 %Block_DATA = dummy.Block_DATA;
 %---------------------------------------------- 
 
-
-
-
-
-
 %output_.predict_tags = Block_DATA.Labels_ ;
 Labels_ = Block_DATA.Labels_;
 tag_label_index = Block_DATA.tag_label_index;
 
-norm_crack_mode_ = normalse_crack_modes(Block_DATA.crack_mode_   ,   normalising_mode_pair , PP_index );
-
-
-
+norm_crack_mode_ = normalse_crack_modes(Block_DATA.crack_mode_ , normalising_mode_pair , PP_index );
 
 for index = 1:length(Labels_)
 %disp(['Tag = ',Labels_{index} ,'.'])
 tag_indicies                   = find(tag_label_index == index);
+
 tag_modes_ =   norm_crack_mode_(:,:,tag_indicies);
 mean_temp = mean(tag_modes_ , 3) ;
 mean_tag_modes_{index}         = mean_temp;
 std_temp = std(tag_modes_,0,3)  ;
 std_tag_modes_{index}          = std_temp;
 
-Block_DATA.mean_tag_modes_ = mean_tag_modes_;
-Block_DATA.std_tag_modes_  = std_tag_modes_;
+
 
 if show_tag_mean_mode_plots == 1
 interp_data = get_interp_data(mean_tag_modes_{index},50);
@@ -137,7 +133,15 @@ plot_interp_data(interp_data,[Labels_{index},':: mean values(normalised to 1-1)'
 interp_data = get_interp_data(std_temp./mean_temp,50);
 plot_interp_data(interp_data,[Labels_{index},':: std over mean   '],0.8)
 end %if show_tag_mean_mode_plots == 1
+
+
 end %for index = 1:length(Labels_)
+
+Block_DATA.mean_tag_modes_ = mean_tag_modes_;
+Block_DATA.std_tag_modes_  = std_tag_modes_;
+
+
+
 
 %  this will be done on the fly
 %  this will be done on the fly
@@ -152,10 +156,12 @@ end %if include_ai == 1
 
 [spec_vals, file_name, output_.plot_data{1} ] =  Get_mode_values_from_a_test(Block_DATA.Percentage_Peaks(PP_index)  , search_limits , FILE_TO_PREDICT , display_plots);
 
+
 SV_crack_mode = spec_vals.crack_mode;
 SV_crack_mode = SV_crack_mode./SV_crack_mode(normalising_mode_pair(1),normalising_mode_pair(2));
 
 spec_vals_temp = reshape(SV_crack_mode, 1 , numel(SV_crack_mode));
+
 output_.crack_mode_vals =  SV_crack_mode;
 output_.file_name      =  file_name;
 output_.block_file     =  DATA_PATH;
@@ -164,9 +170,12 @@ if include_ai == 1
 [return_tag,~,~] = predict(AI_Block , spec_vals_temp(mode_pairs_to_Use));
 end %if include_ai == 1
 
-[Score_vals,output_.plot_data{2}]   = do_mean_std_plot(spec_vals_temp,Block_DATA,mode_pairs_to_Use,labels,std_bar_size,display_plots,file_name,block_file_);
 
-[score_table,log_lik_table, rank_table, within_range_table,std_dist_table, predict_tag,LL_tag]    = get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Block_DATA.Labels_,std_bar_size,include_LL);
+[Score_vals,output_.plot_data{2}]                                                                   =    do_mean_std_plot(spec_vals_temp ,Block_DATA,mode_pairs_to_Use, labels ,std_bar_size,display_plots,file_name,block_file_);
+[score_table,log_lik_table, rank_table, within_range_table,std_dist_table, predict_tag , LL_tag]    =    get_tag_scores (Score_vals,labels,mode_pairs_to_Use,Block_DATA.Labels_,std_bar_size,include_LL);
+
+
+
 
 file_label = file_name(find(file_name =='H')+1);
 
@@ -174,7 +183,6 @@ file_label = file_name(find(file_name =='H')+1);
 output_.txt{1}='-----------------------------------------------------------------\n'                  ; 
 output_.txt{1}= [output_.txt{1},file_name,'\n']                                                       ;
 output_.txt{1}= [output_.txt{1},'LABEL: ',file_label,'\n']                                          ;
-
 output_.txt{1}= [output_.txt{1},'-----------------------------------------------------------------\n'];
 
 if diplay_txt(1) ==1
@@ -187,10 +195,8 @@ fprintf(output_.txt{2})
 end
 
 output_.txt{3} = display_Block_data_stats(Block_DATA);
-
 if diplay_txt(3) ==1
 fprintf(output_.txt{3})
-
 end
 
 
@@ -198,6 +204,9 @@ output_.txt{4} = ['normalising_mode_pair: ',num2str(normalising_mode_pair(1)),'/
 if diplay_txt(4) ==1
 fprintf(output_.txt{4})
 end
+
+
+
 if include_ai == 1
 output_.txt{5} = ['The AI predicts that this results is:   ', return_tag{1} ,' .\n'];
 output_.predict{1} = return_tag{1} ; 
@@ -209,7 +218,6 @@ end
 if diplay_txt(5) ==1
 fprintf(output_.txt{5})
 end
-
 
 if include_LL ==1
 output_.txt{6} = ['The dist from mean predicts that the result is:   ',  predict_tag ,' .\n'];
@@ -229,6 +237,9 @@ end
 if diplay_txt(6) ==1
 fprintf(output_.txt{6})
 end
+
+
+
 
 % formatted_score_table = convert_table_to_formatted_txt(score_table); 
 output_.txt{7} = '-----------------------------------------------------------------\n';

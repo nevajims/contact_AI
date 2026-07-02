@@ -23,6 +23,7 @@ Comb_data_file = [path_,file_];
 dummy =  open(Comb_data_file);
 combined_data = dummy.combined_data;
 cd(P_W_D)
+
     case(1)
 
 if isstruct(varargin{1})
@@ -51,13 +52,6 @@ else
 input_ok = 0;
 disp('combined data doesnt have the correct fields')
 end    
-
-
-
-
-
-
-
 
 if input_ok  ==1
 
@@ -206,6 +200,7 @@ Sum_tab{index}.LeastL = temp_LeastL'     ;
 Tab_{index} =   struct2table(Sum_tab{index});
 
 DistM_tab{index}.Test =  temp_tests'  ; 
+
 LL_tab{index}.Test =  temp_tests'     ; 
 
 for index_3 = 1: length(mode_pair_labels_ff)

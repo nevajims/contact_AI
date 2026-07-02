@@ -12,9 +12,10 @@ disp_overall_settings =1 ;
 %  (3)  does the rangeof %%  from  0 -- 100;
 %  create a block data file with a range of percentage peaks
 %  [5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100]
+
 % combined_data = predict_multiple_tests(1,2,[8,9,14,16],[0.65,0.8],'P:\GITHUBS\AIDATA\120-4bolt-no-wear\Block_data_6_L73_DV_065_8_6GR.mat')
 % combined_data = predict_multiple_tests(1,2,[8,9,14,16],[0.65,0.8],'P:\GITHUBS\AIDATA\120-4bolt-no-wear\Block_data_6_L73_DV_065_9_6GR.mat')
-
+% combined_data = predict_multiple_tests(1,2,[8,9,14,16],[0.65,0.8],'P:\GITHUBS\AIDATA\NEW_LEARNING_SET_3\Block_data_6_Labs_10_threshVALS_64_tests.mat')
 
 % P:\GITHUBS\AIDATA\120-4bolt-no-wear\Processed_data
 
@@ -49,6 +50,7 @@ Block_DATA = dummy.Block_DATA;
 choices_=arrayfun(@(a)num2str(a),Block_DATA.Percentage_Peaks,'uni',0);
 
 [Pecentage_peak_index,~] = listdlg('PromptString','Choose Percentage Peak', 'ListString',choices_,'SelectionMode','single' );
+
 PP_string = num2str(Block_DATA.Percentage_Peaks(Pecentage_peak_index));
 
 overall_settings.Block_file              = file_                                                                              ;

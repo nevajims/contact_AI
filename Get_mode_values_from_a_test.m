@@ -27,6 +27,7 @@ mm33    = squeeze(mode_map(3,3,:))     ;
 mm22    = squeeze(mode_map(2,2,:))     ;
 
 dv = grid_data.distance_vector       ;   
+
 [max_ind, max_val,plot_data]  = get_point_for_mode_map(mm33,dv,Percentage_Peak,search_limits,display_plots);
 
 
